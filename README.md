@@ -2,7 +2,6 @@
 My tools with coding in Python.
 
 ## batch_extension_rename
----
 Use command:
 
 `python batch_fileExtension_rename.py [dir] [old_ext] [new_ext]`
@@ -22,7 +21,6 @@ or
 `python batch_fileExtension_rename.py renametest .py .js`
 
 ## Get
----
 crawler.
 
 ### get_img_bili.py
