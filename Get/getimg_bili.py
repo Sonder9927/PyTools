@@ -1,4 +1,18 @@
+# getimg_bili.py
+# Created : 7th April 2022
+# Last modified : 17th April 2022
+# Version : 1.0.1
+
+'''
+Description :
+
+This script will get images from the homepage of a user in B.
+'''
+# just checking
+_author_ = "Winona"
+
 from requests_html import HTMLSession
+
 userinfo_url = 'https://space.bilibili.com/192357439/video'
 save_folder = r'~/Pictures/images'
 

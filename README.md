@@ -1,7 +1,8 @@
 # PyTools
 My tools with coding in Python.
 
-## batch_extension_rename
+## batch
+### batch_extension_rename
 Use command:
 
 `python batch_fileExtension_rename.py [dir] [old_ext] [new_ext]`
@@ -23,7 +24,12 @@ or
 ## Get
 crawler.
 
-### get_img_bili.py
+### getimg_bili.py
 This can get all the video covers on the homepage of biliusers.
 
 Just need to change ID in the content.
+
+### getimg_zhihu.py
+This script can get all images in a page of zhh.
+
+Need to change url link.
