@@ -17,10 +17,14 @@ import shutil
 
 
 heidashuai = "294675228"
+jiulangxianren = "505390315"
+
 itsBettermie = "192357439"
+tongnainainainai = "23571162"
+jenny = "111060699"
 
 
-bili_id = heidashuai
+bili_id = jenny
 
 
 def get_total_page():
@@ -36,8 +40,8 @@ def get_total_page():
 def get_image_urls():
     base_url = 'https://api.bilibili.com/x/space/arc/search?mid={0}&ps=30&tid=0&pn={1}&keyword=&order=pubdate&jsonp=jsonp'
     session = HTMLSession()
-    for i in range(1, get_total_page()+1):
-    # for i in range(1, 2):
+    # for i in range(1, get_total_page()+1):
+    for i in range(1, 2):
         url = base_url.format(bili_id, i)
         response = session.get(url)
         for i in response.json()['data']['list']['vlist']:
