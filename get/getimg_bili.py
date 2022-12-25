@@ -16,26 +16,29 @@ import requests
 import shutil
 
 
-heidashuai = "192357439"
+heidashuai = "294675228"
+itsBettermie = "192357439"
 
 
 bili_id = heidashuai
 
-userinfo_url = f'https://space.bilibili.com/{bili_id}/video'
-save_folder = r'~/Pictures/images'
 
 def get_total_page():
+    userinfo_url = f'https://space.bilibili.com/{bili_id}/video'
     session = HTMLSession()
     response = session.get(userinfo_url)
     response.html.render()
+    # print(response.html.html)
     total_page = response.html.find('span.be-pager-total', first=True).text
+    print(total_page)
     return int(total_page[2:-3])
 
 def get_image_urls():
-    base_url = f'https://api.bilibili.com/x/space/arc/search?mid={bili_id}&ps=30&tid=0&pn={0}&keyword=&order=pubdate&jsonp=jsonp'
+    base_url = 'https://api.bilibili.com/x/space/arc/search?mid={0}&ps=30&tid=0&pn={1}&keyword=&order=pubdate&jsonp=jsonp'
     session = HTMLSession()
     for i in range(1, get_total_page()+1):
-        url = base_url.format(i)
+    # for i in range(1, 2):
+        url = base_url.format(bili_id, i)
         response = session.get(url)
         for i in response.json()['data']['list']['vlist']:
             print(i)
@@ -46,8 +49,8 @@ def remove_unvalid_chars(s):
         s = s.replace(c, '')
     return s
 
-def download_images():
-    folder = Path(save_folder).expanduser()
+def download_images(dir: str):
+    folder = Path(dir).expanduser()
     if not folder.exists():
         folder.mkdir()
 
@@ -60,5 +63,6 @@ def download_images():
 
 
 if __name__ == "__main__":
-    download_images()
+    save_folder = r'~/Pictures/images'
+    download_images(save_folder)
 
