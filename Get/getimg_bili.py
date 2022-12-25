@@ -1,7 +1,7 @@
 # getimg_bili.py
+# Author: Sonder M. W.
 # Created : 7th April 2022
-# Last modified : 17th April 2022
-# Version : 1.0.1
+# Version : 0.1.2
 
 '''
 Description :
@@ -9,11 +9,19 @@ Description :
 This script will get images from the homepage of a user in B.
 '''
 # just checking
-_author_ = "Winona"
 
 from requests_html import HTMLSession
+from pathlib import Path
+import requests
+import shutil
 
-userinfo_url = 'https://space.bilibili.com/192357439/video'
+
+heidashuai = "192357439"
+
+
+bili_id = heidashuai
+
+userinfo_url = f'https://space.bilibili.com/{bili_id}/video'
 save_folder = r'~/Pictures/images'
 
 def get_total_page():
@@ -24,7 +32,7 @@ def get_total_page():
     return int(total_page[2:-3])
 
 def get_image_urls():
-    base_url = 'https://api.bilibili.com/x/space/arc/search?mid=192357439&ps=30&tid=0&pn={0}&keyword=&order=pubdate&jsonp=jsonp'
+    base_url = f'https://api.bilibili.com/x/space/arc/search?mid={bili_id}&ps=30&tid=0&pn={0}&keyword=&order=pubdate&jsonp=jsonp'
     session = HTMLSession()
     for i in range(1, get_total_page()+1):
         url = base_url.format(i)
@@ -39,11 +47,7 @@ def remove_unvalid_chars(s):
     return s
 
 def download_images():
-    import pathlib
-    import requests
-    import shutil
-
-    folder = pathlib.Path(save_folder).expanduser()
+    folder = Path(save_folder).expanduser()
     if not folder.exists():
         folder.mkdir()
 
@@ -54,4 +58,7 @@ def download_images():
             shutil.copyfileobj(response.raw, f)
         print(f'{i["name"]}.jpg is finished.')
 
-download_images()
+
+if __name__ == "__main__":
+    download_images()
+

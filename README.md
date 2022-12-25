@@ -21,15 +21,27 @@ or
 
 `python batch_fileExtension_rename.py renametest .py .js`
 
+---
 ## Get
 crawler.
 
 ### getimg_bili.py
 This can get all the video covers on the homepage of biliusers.
 
-Just need to change ID in the content.
+Just need to change **ID** in the content.
 
 ### getimg_zhihu.py
 This script can get all images in a page of zhh.
 
-Need to change url link.
+Need to change **url link**.
+
+### getVideo_douyin.py
+This script can get videoes of douyinusers.
+
+Just need to support **User ID** for the script.
+
+---
+## Math
+### boundary_of_points.py
+This script can calculate the **boundary** of **given points**.
+
