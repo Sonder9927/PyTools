@@ -1,0 +1,27 @@
+# set shell := ["fish", "-c"]
+
+vi := "lvim"
+
+# default
+hello:
+    @echo 'Hello, world!'
+    @just --list
+
+tree_ignore := "'grids|temp'"
+
+# tree
+tree:
+  tree -I {{tree_ignore}}
+
+py := "pygmt_plot_diff.py"
+
+# edit python scripts
+ep:
+  {{vi}} {{py}}
+
+# run python scripts to update the figure
+up:
+  python {{py}}
+# show figure
+show:
+  feh images

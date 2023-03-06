@@ -1,1 +1,4 @@
 src/ETOPO1.grd
+__pycache__
+src/*.bash
+temp/*
