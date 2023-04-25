@@ -24,7 +24,7 @@ tongnainainainai = "23571162"
 jenny = "111060699"
 
 
-bili_id = jenny
+bili_id = heidashuai
 
 
 def get_total_page():
