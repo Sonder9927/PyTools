@@ -1,4 +1,4 @@
-from src import grid
+from src import info_filter
 
 from icecream import ic
 from pathlib import Path
@@ -148,8 +148,8 @@ def grid_inner_for_grdimage(grdfile: str, region, sta):
     # cut vel_diff_grd by the boundary of stations
     data = pygmt.grd2xyz(grdfile)
 
-    boundary = grid.points_boundary(sta)
-    data_inner = grid.points_inner(data, boundary=boundary)
+    boundary = info_filter.points_boundary(sta)
+    data_inner = info_filter.points_inner(data, boundary=boundary)
 
     return pygmt.xyz2grd(data=data_inner, region=region, spacing=.01)
 

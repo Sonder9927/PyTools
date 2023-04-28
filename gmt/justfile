@@ -13,15 +13,18 @@ tree_ignore := "'grids|temp'"
 tree:
   tree -I {{tree_ignore}}
 
-py := "pygmt_plot_diff.py"
+pydiff := "pygmt_plot_diff.py"
+pyinfo := "vel_avg_diff.py"
 
 # edit python scripts
 ep:
-  {{vi}} {{py}}
+  {{vi}} {{pydiff}} {{pyinfo}}
 
 # run python scripts to update the figure
 up:
-  python {{py}}
+  python {{pydiff}}
+  python {{pyinfo}}
+
 # show figure
 show:
   feh images

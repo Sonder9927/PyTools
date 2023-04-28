@@ -34,5 +34,6 @@ def gmt_plot_Vel_all_periods(periods):
 
 if __name__ == "__main__":
     periods = [20, 26, 28, 30, 34, 38]
+    periods = [20]
     gmt_plot_diff_all_periods(periods)
 

@@ -21,7 +21,7 @@ def times_of_crossing_boundary(point: Point, points: list[Point]) -> int:
 
 ###############################################################################
 
-def points_boundary(grids):
+def points_boundary(grids: pd.DataFrame):
     """
     Get the boundary of points getted from the file.
     """
@@ -31,7 +31,7 @@ def points_boundary(grids):
     return points[hull.vertices]
 
 
-def points_inner(data, boundary):
+def points_inner(data: pd.DataFrame, boundary: list[Point]) -> pd.DataFrame:
     lo = [i[0] for i in boundary]
     la = [i[1] for i in boundary]
 
