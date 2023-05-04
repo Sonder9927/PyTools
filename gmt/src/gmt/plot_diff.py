@@ -2,7 +2,7 @@
 # Version: 0.1.0
 # Description: plot diff between 2 grid files.
 
-from .gmt_make_data import make_topo, make_grd, grid_inner_for_grdimage
+from .gmt_make_data import make_topo, make_grd, diff_inner
 
 # from icecream import ic
 import pandas as pd
@@ -59,7 +59,7 @@ def fig_diff(fig, diff, region, scale, cpt, topo_gra, sta):
     )
 
     # cut vel_diff_grd by the boundary of stations
-    diff = grid_inner_for_grdimage(diff, region, sta)
+    diff = diff_inner(diff, region, sta)
     fig.grdimage(grid=diff, cmap=cpt, shading=topo_gra)
 
     fig = fig_sta(fig, sta)
@@ -98,25 +98,26 @@ def gmt_plot_diff(region, cpt, tpwt_grd, ant_grd, diff_grd, topo_gra, fname):
 
     # plot diff
     fig.shift_origin(xshift="-10c", yshift="-8c")
-    cpt_diff = "src/vs_dif.cpt"
+    cpt_diff = "src/txt/vs_dif.cpt"
     fig = fig_diff(fig, diff_grd, region, SCALE, cpt_diff, topo_gra, sta)
     # plot average vel info
 
     fig.savefig(fname)
 
 
-def plot_diff(grid_tpwt, grid_ant, region, fig_name):
+def plot_diff_per(per, grid_tpwt, grid_ant, region, fig_name):
 
     # cpt file
     cptfile = "temp/test.cpt"
     # grd file
     tpwt_grd = "temp/vel_tpwt.grd"
     ant_grd = "temp/vel_ant.grd"
-    diff_grd = "temp/vel_diff.grd"
+    # diff grid which can be used to calculate standard deviation
+    diff_grd = f"src/vel_diff/vel_diff_{per}.grd"
 
     make_grd(grid_tpwt, grid_ant, region, cptfile, tpwt_grd, ant_grd, diff_grd)
     # topo file
-    TOPO = "src/ETOPO1.grd"
+    TOPO = "src/txt/ETOPO1.grd"
     TOPO_GRA = "temp/topo.gradient"
     make_topo(TOPO, region, TOPO_GRA)
 
