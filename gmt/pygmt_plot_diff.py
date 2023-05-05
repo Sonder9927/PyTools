@@ -16,7 +16,7 @@ def gmt_plot_diff_all_periods(periods):
         region = [115, 122.5, 27.9, 34.3]
 
         fig_name = f"images/diff_{per}.png"
-        gmt.plot_diff_per(per, grid_tpwt, grid_ant, region, fig_name)
+        gmt.plot_diff(grid_tpwt, grid_ant, region, fig_name)
 
 
 def gmt_plot_Vel_all_periods(periods):
@@ -33,8 +33,8 @@ def gmt_plot_Vel_all_periods(periods):
         # gmt.plot_vel(grid_tpwt, region, fig_name)
 
 if __name__ == "__main__":
-    periods = [20]
     periods = [20, 26, 28, 30, 34]
+    periods = [20]
 
     gmt_plot_diff_all_periods(periods)
 

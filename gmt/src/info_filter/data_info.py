@@ -3,6 +3,7 @@ from tpwt_r import Point
 from icecream import ic
 import pandas as pd
 import numpy as np
+import pygmt
 import json
 
 from src import gmt
@@ -28,25 +29,25 @@ def vel_info_per(data_file: Path, points: list) -> dict:
     return grid_per
 
 
-def info_of_grid_exists(target: Path, points: list) -> dict:
-    if target.exists():
+def standard_deviation_per(ant, tpwt, region, stas, spacing) -> float:
+    temp = "temp/temp.grd"
+    gmt.gmt_blockmean_surface_grdsample(ant, temp, temp, region)
+    ant = pygmt.grd2xyz(temp)
+    gmt.gmt_blockmean_surface_grdsample(tpwt, temp, temp, region)
+    tpwt = pygmt.grd2xyz(temp)
 
-        info = vel_info_per(target, points)
-        return info
-    else:
-        return {}
+    # make diff
+    diff = tpwt
+    diff.z = (tpwt.z - ant.z) * 1000
+    gmt.gmt_blockmean_surface_grdsample(diff, temp, temp, region, outgrid=temp, spacing=spacing)
 
-
-def standard_deviation_per(diff_grd: str) -> float:
-    region = [115, 122.5, 27.9, 34.3]
-    sta = pd.read_csv("src/txt/station.lst",
-        usecols=[1, 2], index_col=None, header=None, delim_whitespace=True)
-    diff = gmt.diff_inner(diff_grd, region, sta)
+    diff = gmt.diff_inner(temp, region, stas)
 
     return np.std(diff).data.tolist()
 
 
-def vel_info(periods: list, target: str):
+def vel_info(periods: list, target: str, spacing: float):
+    region = [115, 122.5, 27.9, 34.3]
     sta_file = "src/txt/station.lst"
     stas = pd.read_csv(sta_file, delim_whitespace=True, usecols=[1, 2], names=["x", "y"])
     boundary_points = points_boundary(stas[["x", "y"]])  # default is clock
@@ -56,20 +57,20 @@ def vel_info(periods: list, target: str):
 
     jsd = dict()
     for per in periods:
-        tpwt = gd / "tpwt_grids" / f"tpwt_{per}"
         ant = gd / "ant_grids" / f"ant_{per}"
-        ant_info = info_of_grid_exists(ant, boundary_points)
-        tpwt_info = info_of_grid_exists(tpwt, boundary_points)
+        tpwt = gd / "tpwt_grids" / f"tpwt_{per}"
+
+        ant_info = vel_info_per(ant, boundary_points) if (a := ant.exists()) else {}
+        tpwt_info = vel_info_per(tpwt, boundary_points) if (t := tpwt.exists()) else {}
 
         js_per = dict()
 
-        ic.enable()
-        if all([ant_info, tpwt_info]):
+        ic.disable()
+        if all([a, t]):
             vel_avg_diff = abs(ant_info["vel_avg"]-tpwt_info["vel_avg"])
             vel_avg_diff = "{:.2f} m/s".format(vel_avg_diff * 1000)
             js_per.update({"avg_diff": vel_avg_diff})
-            diff_grd = f"src/vel_diff/vel_diff_{per}.grd"
-            st = standard_deviation_per(diff_grd)
+            st = standard_deviation_per(ant, tpwt, region, stas, spacing=spacing)
             vel_standart_deviation = "{:.2f} m/s".format(st)
             js_per.update({"standard_deviation": vel_standart_deviation})
             ic(per, vel_avg_diff, vel_standart_deviation)

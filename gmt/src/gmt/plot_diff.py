@@ -105,17 +105,17 @@ def gmt_plot_diff(region, cpt, tpwt_grd, ant_grd, diff_grd, topo_gra, fname):
     fig.savefig(fname)
 
 
-def plot_diff_per(per, grid_tpwt, grid_ant, region, fig_name):
+def plot_diff(grid_tpwt, grid_ant, region, fig_name):
 
     # cpt file
     cptfile = "temp/test.cpt"
     # grd file
-    tpwt_grd = "temp/vel_tpwt.grd"
     ant_grd = "temp/vel_ant.grd"
+    tpwt_grd = "temp/vel_tpwt.grd"
     # diff grid which can be used to calculate standard deviation
-    diff_grd = f"src/vel_diff/vel_diff_{per}.grd"
+    diff_grd = "temp/vel_diff.grd"
 
-    make_grd(grid_tpwt, grid_ant, region, cptfile, tpwt_grd, ant_grd, diff_grd)
+    make_grd(grid_ant, grid_tpwt, region, cptfile, ant_grd, tpwt_grd, diff_grd)
     # topo file
     TOPO = "src/txt/ETOPO1.grd"
     TOPO_GRA = "temp/topo.gradient"
