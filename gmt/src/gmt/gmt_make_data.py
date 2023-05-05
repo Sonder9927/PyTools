@@ -1,6 +1,5 @@
 from src import info_filter
 
-from icecream import ic
 from pathlib import Path
 import pandas as pd
 import pygmt
