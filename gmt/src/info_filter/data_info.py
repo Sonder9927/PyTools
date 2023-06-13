@@ -2,7 +2,6 @@ from pathlib import Path
 from tpwt_r import Point
 from icecream import ic
 import pandas as pd
-import numpy as np
 import pygmt
 import json
 
@@ -29,7 +28,7 @@ def vel_info_per(data_file: Path, points: list) -> dict:
     return grid_per
 
 
-def standard_deviation_per(ant, tpwt, region, stas, spacing) -> float:
+def standard_deviation_per(ant, tpwt, region, stas) -> float:
     temp = "temp/temp.grd"
     gmt.gmt_blockmean_surface_grdsample(ant, temp, temp, region)
     ant = pygmt.grd2xyz(temp)
@@ -38,15 +37,16 @@ def standard_deviation_per(ant, tpwt, region, stas, spacing) -> float:
 
     # make diff
     diff = tpwt
-    diff.z = (tpwt.z - ant.z) * 1000
-    gmt.gmt_blockmean_surface_grdsample(diff, temp, temp, region, outgrid=temp, spacing=spacing)
+    diff.z = (tpwt.z - ant.z) * 1000 # 0.5 X 0.5 grid
 
-    diff = gmt.diff_inner(temp, region, stas)
+    boundary = points_boundary(stas)
+    data_inner = points_inner(diff, boundary=boundary)
+    std = data_inner.z.std(ddof=0)
 
-    return np.std(diff).data.tolist()
+    return std
 
 
-def vel_info(periods: list, target: str, spacing: float):
+def vel_info(periods: list, target: str):
     region = [115, 122.5, 27.9, 34.3]
     sta_file = "src/txt/station.lst"
     stas = pd.read_csv(sta_file, delim_whitespace=True, usecols=[1, 2], names=["x", "y"])
@@ -70,7 +70,7 @@ def vel_info(periods: list, target: str, spacing: float):
             vel_avg_diff = abs(ant_info["vel_avg"]-tpwt_info["vel_avg"])
             vel_avg_diff = "{:.2f} m/s".format(vel_avg_diff * 1000)
             js_per.update({"avg_diff": vel_avg_diff})
-            st = standard_deviation_per(ant, tpwt, region, stas, spacing=spacing)
+            st = standard_deviation_per(ant, tpwt, region, stas)
             vel_standart_deviation = "{:.2f} m/s".format(st)
             js_per.update({"standard_deviation": vel_standart_deviation})
             ic(per, vel_avg_diff, vel_standart_deviation)

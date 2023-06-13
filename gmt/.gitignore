@@ -1,4 +1,5 @@
 ETOPO1.grd
+loop
 __pycache__
 src/*.bash
 temp/*
