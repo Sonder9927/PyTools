@@ -10,4 +10,3 @@ def plot_vel_per():
 
     # gmt plot
     gmt_plot_vel()
-

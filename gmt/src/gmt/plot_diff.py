@@ -12,10 +12,10 @@ import pygmt
 def fig_sta(fig, sta):
     # station
     fig.plot(
-        data = sta,
-        style = "t0.1c",
-        fill = "blue",
-        pen = "black",
+        data=sta,
+        style="t0.1c",
+        fill="blue",
+        pen="black",
     )
     # fig.plot(data="ncc_lv.xy", pen="0.8p,black")
     fig.plot(data="src/txt/China_tectonic.dat", pen="thick,black,-")
@@ -28,18 +28,16 @@ def fig_tomo(fig, grid, region, scale, title, cpt, topo_gra, sta):
     plot single fig of tpwt or ant
     """
     fig.basemap(
-            projection = scale,
-            region = region,
-            frame = [f'WSne+t"{title}"', "xa2f2", "ya2f2"]
-        )
+        projection=scale, region=region, frame=[f'WSne+t"{title}"', "xa2f2", "ya2f2"]
+    )
 
     fig.coast(shorelines="", resolution="l", land="white", area_thresh=10_000)
     # grdimage
     # ==================================================================
     fig.grdimage(
-        grid = grid,
-        cmap = cpt,
-        shading = topo_gra,
+        grid=grid,
+        cmap=cpt,
+        shading=topo_gra,
     )
 
     fig = fig_sta(fig, sta)
@@ -49,13 +47,13 @@ def fig_tomo(fig, grid, region, scale, title, cpt, topo_gra, sta):
 
 def fig_diff(fig, diff, region, scale, cpt, topo_gra, sta):
     fig.coast(
-        region = region,
-        projection = scale,
-        frame = ["WSne", "xa2f2", "ya2f2"],
-        shorelines = "",
-        resolution = "l",
-        land = "white",
-        area_thresh = 10_000
+        region=region,
+        projection=scale,
+        frame=["WSne", "xa2f2", "ya2f2"],
+        shorelines="",
+        resolution="l",
+        land="white",
+        area_thresh=10_000,
     )
 
     # cut vel_diff_grd by the boundary of stations
@@ -77,15 +75,24 @@ def gmt_plot_diff(region, cpt, tpwt_grd, ant_grd, diff_grd, topo_gra, fname):
     x = (region[0] + region[1]) / 2
     y = (region[2] + region[3]) / 2
     SCALE = f"m{x}/{y}/0.3i"
-    # position of stations 
-    sta = pd.read_csv("src/txt/station.lst",
-        usecols=[1, 2], index_col=None, header=None, delim_whitespace=True)
+    # position of stations
+    sta = pd.read_csv(
+        "src/txt/station.lst",
+        usecols=[1, 2],
+        index_col=None,
+        header=None,
+        delim_whitespace=True,
+    )
 
     # calculate boundary points for grdimage
     # gmt plot
     # define figure configuration
-    pygmt.config(MAP_FRAME_TYPE="plain", MAP_TITLE_OFFSET="0.25p",
-        MAP_DEGREE_SYMBOL="none", FONT_TITLE="18")
+    pygmt.config(
+        MAP_FRAME_TYPE="plain",
+        MAP_TITLE_OFFSET="0.25p",
+        MAP_DEGREE_SYMBOL="none",
+        FONT_TITLE="18",
+    )
 
     # plot tpwt fig
     fig = fig_tomo(fig, tpwt_grd, region, SCALE, "tpwt", cpt, topo_gra, sta)
@@ -106,7 +113,6 @@ def gmt_plot_diff(region, cpt, tpwt_grd, ant_grd, diff_grd, topo_gra, fname):
 
 
 def plot_diff(grid_tpwt, grid_ant, region, fig_name):
-
     # cpt file
     cptfile = "temp/test.cpt"
     # grd file
@@ -122,4 +128,3 @@ def plot_diff(grid_tpwt, grid_ant, region, fig_name):
     make_topo(TOPO, region, TOPO_GRA)
 
     gmt_plot_diff(region, cptfile, tpwt_grd, ant_grd, diff_grd, TOPO_GRA, fig_name)
-

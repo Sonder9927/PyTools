@@ -10,4 +10,3 @@ def plot_as_per():
 
     # gmt plot
     gmt_plot_as()
-

@@ -11,7 +11,9 @@ from .points import points_boundary, points_inner
 
 
 def read_xyz(file: Path) -> pd.DataFrame:
-    return pd.read_csv(file, delim_whitespace=True, usecols=[0, 1, 2], names=["x", "y", "z"])
+    return pd.read_csv(
+        file, delim_whitespace=True, usecols=[0, 1, 2], names=["x", "y", "z"]
+    )
 
 
 def vel_info_per(data_file: Path, points: list) -> dict:
@@ -37,7 +39,7 @@ def standard_deviation_per(ant, tpwt, region, stas) -> float:
 
     # make diff
     diff = tpwt
-    diff.z = (tpwt.z - ant.z) * 1000 # 0.5 X 0.5 grid
+    diff.z = (tpwt.z - ant.z) * 1000  # 0.5 X 0.5 grid
 
     boundary = points_boundary(stas)
     data_inner = points_inner(diff, boundary=boundary)
@@ -49,7 +51,9 @@ def standard_deviation_per(ant, tpwt, region, stas) -> float:
 def vel_info(periods: list, target: str):
     region = [115, 122.5, 27.9, 34.3]
     sta_file = "src/txt/station.lst"
-    stas = pd.read_csv(sta_file, delim_whitespace=True, usecols=[1, 2], names=["x", "y"])
+    stas = pd.read_csv(
+        sta_file, delim_whitespace=True, usecols=[1, 2], names=["x", "y"]
+    )
     boundary_points = points_boundary(stas[["x", "y"]])  # default is clock
     # po = clock_sorted(boundary_points)  # no need
 
@@ -67,7 +71,7 @@ def vel_info(periods: list, target: str):
 
         ic.disable()
         if all([a, t]):
-            vel_avg_diff = abs(ant_info["vel_avg"]-tpwt_info["vel_avg"])
+            vel_avg_diff = abs(ant_info["vel_avg"] - tpwt_info["vel_avg"])
             vel_avg_diff = "{:.2f} m/s".format(vel_avg_diff * 1000)
             js_per.update({"avg_diff": vel_avg_diff})
             st = standard_deviation_per(ant, tpwt, region, stas)
@@ -82,4 +86,3 @@ def vel_info(periods: list, target: str):
 
     with open(target, "w+", encoding="UTF-8") as f:
         json.dump(jsd, f)
-

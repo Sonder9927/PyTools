@@ -33,7 +33,7 @@ def gmt_plot_Vel_all_periods(periods):
         # gmt.plot_vel(grid_tpwt, region, fig_name)
 
 if __name__ == "__main__":
-    periods = [20]
+    periods = [32]
     periods = [20, 26, 28, 30, 32, 34]
 
     gmt_plot_diff_all_periods(periods)
