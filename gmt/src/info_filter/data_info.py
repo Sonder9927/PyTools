@@ -1,5 +1,4 @@
 from pathlib import Path
-from tpwt_r import Point
 from icecream import ic
 import pandas as pd
 import pygmt
@@ -8,6 +7,7 @@ import json
 from src import gmt
 
 from .points import points_boundary, points_inner
+# from tpwt_r import Point
 
 
 def read_xyz(file: Path) -> pd.DataFrame:
@@ -20,6 +20,7 @@ def vel_info_per(data_file: Path, points: list) -> dict:
     data = read_xyz(data_file)
     data_inner = points_inner(data, points)
 
+    # sourcery skip: inline-immediately-returned-variable
     grid_per = {
         "vel_avg": data_inner.z.mean(),
         "vel_max": data_inner.z.max(),
@@ -59,7 +60,7 @@ def vel_info(periods: list, target: str):
 
     gd = Path("grids")
 
-    jsd = dict()
+    jsd = {}
     for per in periods:
         ant = gd / "ant_grids" / f"ant_{per}"
         tpwt = gd / "tpwt_grids" / f"tpwt_{per}"
@@ -67,22 +68,22 @@ def vel_info(periods: list, target: str):
         ant_info = vel_info_per(ant, boundary_points) if (a := ant.exists()) else {}
         tpwt_info = vel_info_per(tpwt, boundary_points) if (t := tpwt.exists()) else {}
 
-        js_per = dict()
+        js_per = {}
 
         ic.disable()
         if all([a, t]):
             vel_avg_diff = abs(ant_info["vel_avg"] - tpwt_info["vel_avg"])
             vel_avg_diff = "{:.2f} m/s".format(vel_avg_diff * 1000)
-            js_per.update({"avg_diff": vel_avg_diff})
+            js_per["avg_diff"] = vel_avg_diff
             st = standard_deviation_per(ant, tpwt, region, stas)
             vel_standart_deviation = "{:.2f} m/s".format(st)
-            js_per.update({"standard_deviation": vel_standart_deviation})
+            js_per["standard_deviation"] = vel_standart_deviation
             ic(per, vel_avg_diff, vel_standart_deviation)
         else:
             ic(per, "Data info lacked.")
-        js_per.update({"ant": ant_info, "tpwt": tpwt_info})
+        js_per |= {"ant": ant_info, "tpwt": tpwt_info}
 
-        jsd.update({str(per): js_per})
+        jsd[str(per)] = js_per
 
     with open(target, "w+", encoding="UTF-8") as f:
         json.dump(jsd, f)

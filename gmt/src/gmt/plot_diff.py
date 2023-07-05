@@ -2,54 +2,20 @@
 # Version: 0.1.0
 # Description: plot diff between 2 grid files.
 
-from .gmt_make_data import make_topo, make_grd, diff_inner
+from .gmt_make_data import make_topo, diff_make, diff_inner
+from .gmt_fig import fig_tomo, fig_sta
 
 # from icecream import ic
 import pandas as pd
+from pathlib import Path
 import pygmt
 
 
-def fig_sta(fig, sta):
-    # station
-    fig.plot(
-        data=sta,
-        style="t0.1c",
-        fill="blue",
-        pen="black",
-    )
-    # fig.plot(data="ncc_lv.xy", pen="0.8p,black")
-    fig.plot(data="src/txt/China_tectonic.dat", pen="thick,black,-")
-
-    return fig
-
-
-def fig_tomo(fig, grid, region, scale, title, cpt, topo_gra, sta):
-    """
-    plot single fig of tpwt or ant
-    """
-    fig.basemap(
-        projection=scale, region=region, frame=[f'WSne+t"{title}"', "xa2f2", "ya2f2"]
-    )
-
-    fig.coast(shorelines="", resolution="l", land="white", area_thresh=10_000)
-    # grdimage
-    # ==================================================================
-    fig.grdimage(
-        grid=grid,
-        cmap=cpt,
-        shading=topo_gra,
-    )
-
-    fig = fig_sta(fig, sta)
-
-    return fig
-
-
-def fig_diff(fig, diff, region, scale, cpt, topo_gra, sta):
+def fig_diff(fig, diff, region, scale, title, cpt, topo_gra, sta):
     fig.coast(
         region=region,
         projection=scale,
-        frame=["WSne", "xa2f2", "ya2f2"],
+        frame=[f"WSne+t{title}", "xa2f2", "ya2f2"],
         shorelines="",
         resolution="l",
         land="white",
@@ -63,7 +29,9 @@ def fig_diff(fig, diff, region, scale, cpt, topo_gra, sta):
     fig = fig_sta(fig, sta)
 
     # colorbar
-    fig.colorbar(cmap=cpt, position="jBC+w8c/0.4c+o0c/-1.5c+m", frame="xa30f30")
+    fig.colorbar(
+        cmap=cpt, position="jBC+w8c/0.4c+o0c/-1.5c+m", frame="xa30f30"
+    )  # fmt: skip
 
     return fig
 
@@ -101,12 +69,17 @@ def gmt_plot_diff(region, cpt, tpwt_grd, ant_grd, diff_grd, topo_gra, fname):
     # plot ant fig
     fig = fig_tomo(fig, ant_grd, region, SCALE, "ant", cpt, topo_gra, sta)
     # plot colorbar
-    fig.colorbar(cmap=cpt, position="jBC+w5c/0.4c+o0c/-1.5c+m", frame="xa0.2f0.2")
+    fig.colorbar(
+        cmap=cpt, position="jBC+w5c/0.4c+o0c/-1.5c+m", frame="xa0.2f0.2"
+    )  # fmt: skip
 
     # plot diff
     fig.shift_origin(xshift="-10c", yshift="-8c")
     cpt_diff = "src/txt/vs_dif.cpt"
-    fig = fig_diff(fig, diff_grd, region, SCALE, cpt_diff, topo_gra, sta)
+    diff_title = Path(fname).stem
+    fig = fig_diff(
+        fig, diff_grd, region, SCALE, diff_title, cpt_diff, topo_gra, sta
+    )
     # plot average vel info
 
     fig.savefig(fname)
@@ -121,10 +94,14 @@ def plot_diff(grid_tpwt, grid_ant, region, fig_name):
     # diff grid which can be used to calculate standard deviation
     diff_grd = "temp/vel_diff.grd"
 
-    make_grd(grid_ant, grid_tpwt, region, cptfile, ant_grd, tpwt_grd, diff_grd)
+    diff_make(
+        grid_ant, grid_tpwt, region, cptfile, ant_grd, tpwt_grd, diff_grd
+    )  # fmt: skip
     # topo file
     TOPO = "src/txt/ETOPO1.grd"
     TOPO_GRA = "temp/topo.gradient"
-    make_topo(TOPO, region, TOPO_GRA)
+    make_topo(TOPO, region, TOPO_GRA, "t")
 
-    gmt_plot_diff(region, cptfile, tpwt_grd, ant_grd, diff_grd, TOPO_GRA, fig_name)
+    gmt_plot_diff(
+        region, cptfile, tpwt_grd, ant_grd, diff_grd, TOPO_GRA, fig_name
+    )  # fmt: skip
