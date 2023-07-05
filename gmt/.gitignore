@@ -3,6 +3,7 @@ loop
 __pycache__
 src/*.bash
 temp/*
+target/*
 images/figs_*
 *grids_*
 grids/ant_grids/*

@@ -13,17 +13,9 @@ tree_ignore := "'grids|temp'"
 tree:
   tree -I {{tree_ignore}}
 
-pydiff := "pygmt_plot_diff.py"
-pyinfo := "vel_avg_diff.py"
-
-# edit python scripts
-ep:
-  {{vi}} {{pydiff}} {{pyinfo}}
-
-# run python scripts to update the figure
+# run python scripts to update figs
 up:
-  python {{pydiff}}
-  python {{pyinfo}}
+  python tpwt_res.py
 
 # show figure
 show:
