@@ -3,7 +3,7 @@ from pathlib import Path
 import json
 
 
-def ppt_add_diffs(prs, figs: Path, info_file, margin, shape=None):
+def ppt_add_diffs(prs, figs: Path, info_file, margin):
     """
     This script can insert a diff picture
     with info into a new slide of pptx.
@@ -21,6 +21,13 @@ def ppt_add_diffs(prs, figs: Path, info_file, margin, shape=None):
     title.text = "Diff Results"
 
     blank_slide_layout = prs.slide_layouts[6]
+    # insert dispersion curves
+    dc = figs / r"dispersion_curves.png"
+    if dc.exists():
+        slide = prs.slides.add_slide(blank_slide_layout)
+        slide.shapes.add_picture(str(dc), util.Cm(2.5), util.Cm(5),
+                                 util.Cm(20), util.Cm(10))
+
     for f in figs.glob("*diff*"):
         # insert diff fig into new slide
         slide = prs.slides.add_slide(blank_slide_layout)

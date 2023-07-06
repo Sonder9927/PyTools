@@ -7,6 +7,7 @@ import json
 from src import gmt
 
 from .points import points_boundary, points_inner
+
 # from tpwt_r import Point
 
 
@@ -49,7 +50,7 @@ def standard_deviation_per(ant, tpwt, region, stas) -> float:
     return std
 
 
-def vel_info(periods: list, target: str):
+def vel_info(target: str, periods=None):
     region = [115, 122.5, 27.9, 34.3]
     sta_file = "src/txt/station.lst"
     stas = pd.read_csv(
@@ -59,14 +60,21 @@ def vel_info(periods: list, target: str):
     # po = clock_sorted(boundary_points)  # no need
 
     gd = Path("grids")
+    if periods is None:
+        pg = gd.rglob("*/*")
+        periods = sorted([int(i.stem.split("_")[-1]) for i in pg])
 
     jsd = {}
     for per in periods:
         ant = gd / "ant_grids" / f"ant_{per}"
         tpwt = gd / "tpwt_grids" / f"tpwt_{per}"
 
-        ant_info = vel_info_per(ant, boundary_points) if (a := ant.exists()) else {}
-        tpwt_info = vel_info_per(tpwt, boundary_points) if (t := tpwt.exists()) else {}
+        ant_info = (
+            vel_info_per(ant, boundary_points) if (a := ant.exists()) else {}
+        )
+        tpwt_info = (
+            vel_info_per(tpwt, boundary_points) if (t := tpwt.exists()) else {}
+        )
 
         js_per = {}
 

@@ -9,11 +9,7 @@ def times_of_crossing_boundary(point: Point, points: list[Point]) -> int:
     times = 0
     for i in range(len(points)):
         segment_start = points[i]
-        if i == len(points) - 1:
-            segment_end = points[0]
-        else:
-            segment_end = points[i + 1]
-
+        segment_end = points[0] if i == len(points) - 1 else points[i + 1]
         if point.is_ray_intersects_segment(segment_start, segment_end):
             times += 1
 
@@ -55,7 +51,8 @@ def points_inner(data: pd.DataFrame, boundary: list[Point]) -> pd.DataFrame:
             p_inner.append([point, points_in_rect.z[i]])
 
     data = pd.DataFrame(
-        data=[[i[0].lo, i[0].la, i[1]] for i in p_inner], columns=["x", "y", "z"]
+        data=[[i[0].lo, i[0].la, i[1]] for i in p_inner],
+        columns=["x", "y", "z"],
     )
 
     return data
