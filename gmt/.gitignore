@@ -4,7 +4,5 @@ __pycache__
 src/*.bash
 temp/*
 target/*
-images/figs_*
-*grids_*
-grids/ant_grids/*
-grids/tpwt_grids/*
+images
+grids/*

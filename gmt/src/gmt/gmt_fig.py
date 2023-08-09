@@ -1,3 +1,6 @@
+from .gmt_make_data import data_inner
+
+
 def fig_vel(fig, topo_grd, vel_grd, region, scale, title, cpts, topo_gra, sta):
     fig.basemap(
         projection=scale,
@@ -8,7 +11,10 @@ def fig_vel(fig, topo_grd, vel_grd, region, scale, title, cpts, topo_gra, sta):
     fig.coast(shorelines="", resolution="l", land="white", area_thresh=10_000)
     # grdimage
     fig.grdimage(grid=topo_grd, cmap=cpts[0], shading=topo_gra)
+    # cut vel_grd by the boundary of stations
     fig.grdimage(grid=vel_grd, cmap=cpts[1], shading=topo_gra)
+    # vel_inner = data_inner(vel_grd, region, sta)
+    # fig.grdimage(grid=vel_inner, cmap=cpts[1], shading=topo_gra)
 
     fig = fig_sta(fig, sta)
     return fig

@@ -15,7 +15,7 @@ tree:
 
 # run python scripts to update figs
 up:
-  python tpwt_res.py
+  python plot_result.py
 
 # show figure
 show:

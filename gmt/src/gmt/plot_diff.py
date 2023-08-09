@@ -2,7 +2,7 @@
 # Version: 0.1.0
 # Description: plot diff between 2 grid files.
 
-from .gmt_make_data import make_topo, diff_make, diff_inner
+from .gmt_make_data import make_topo, diff_make, data_inner
 from .gmt_fig import fig_tomo, fig_sta
 
 # from icecream import ic
@@ -23,7 +23,7 @@ def fig_diff(fig, diff, region, scale, title, cpt, topo_gra, sta):
     )
 
     # cut vel_diff_grd by the boundary of stations
-    diff = diff_inner(diff, region, sta)
+    diff = data_inner(diff, region, sta)
     fig.grdimage(grid=diff, cmap=cpt, shading=topo_gra)
 
     fig = fig_sta(fig, sta)

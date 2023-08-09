@@ -4,9 +4,10 @@ import pandas as pd
 import pygmt
 import json
 
-from src import gmt
+from src import gmt  # pyright: ignore
 
 from .points import points_boundary, points_inner
+from .grid_period import GridPeriod
 
 # from tpwt_r import Point
 
@@ -32,16 +33,25 @@ def vel_info_per(data_file: Path, points: list) -> dict:
     return grid_per
 
 
-def standard_deviation_per(ant, tpwt, region, stas) -> float:
+def standard_deviation_per(ant: Path, tpwt: Path, region, stas) -> float:
     temp = "temp/temp.grd"
     gmt.gmt_blockmean_surface_grdsample(ant, temp, temp, region)
-    ant = pygmt.grd2xyz(temp)
+    ant_xyz = pygmt.grd2xyz(temp)
     gmt.gmt_blockmean_surface_grdsample(tpwt, temp, temp, region)
-    tpwt = pygmt.grd2xyz(temp)
+    tpwt_xyz = pygmt.grd2xyz(temp)
+    if ant_xyz is None or tpwt_xyz is None:
+        raise ValueError(
+            f"""
+            Cannot calculate standard deviation with \n
+            ant: {ant}\n
+            and\n
+            tpwt: {tpwt}
+            """
+        )
 
     # make diff
-    diff = tpwt
-    diff.z = (tpwt.z - ant.z) * 1000  # 0.5 X 0.5 grid
+    diff = tpwt_xyz
+    diff.z = (tpwt_xyz.z - ant_xyz.z) * 1000  # 0.5 X 0.5 grid
 
     boundary = points_boundary(stas)
     data_inner = points_inner(diff, boundary=boundary)
@@ -61,37 +71,38 @@ def vel_info(target: str, periods=None):
 
     gd = Path("grids")
     if periods is None:
-        pg = gd.rglob("*/*")
+        pg = gd.glob("*/*")
         periods = sorted([int(i.stem.split("_")[-1]) for i in pg])
 
+    gps = [GridPeriod(per) for per in periods]
     jsd = {}
-    for per in periods:
-        ant = gd / "ant_grids" / f"ant_{per}"
-        tpwt = gd / "tpwt_grids" / f"tpwt_{per}"
+    for gp in gps:
+        ant = gp.grid_file("ant", "vel")
+        tpwt = gp.grid_file("tpwt", "vel")
 
         ant_info = (
-            vel_info_per(ant, boundary_points) if (a := ant.exists()) else {}
+            vel_info_per(ant, boundary_points) if ant is not None else {}
         )
         tpwt_info = (
-            vel_info_per(tpwt, boundary_points) if (t := tpwt.exists()) else {}
+            vel_info_per(tpwt, boundary_points) if tpwt is not None else {}
         )
 
         js_per = {}
 
         ic.disable()
-        if all([a, t]):
+        if all([ant, tpwt]):
             vel_avg_diff = abs(ant_info["vel_avg"] - tpwt_info["vel_avg"])
             vel_avg_diff = "{:.2f} m/s".format(vel_avg_diff * 1000)
             js_per["avg_diff"] = vel_avg_diff
             st = standard_deviation_per(ant, tpwt, region, stas)
             vel_standart_deviation = "{:.2f} m/s".format(st)
             js_per["standard_deviation"] = vel_standart_deviation
-            ic(per, vel_avg_diff, vel_standart_deviation)
+            ic(gp.period, vel_avg_diff, vel_standart_deviation)
         else:
-            ic(per, "Data info lacked.")
+            ic(gp.period, "Data info lacked.")
         js_per |= {"ant": ant_info, "tpwt": tpwt_info}
 
-        jsd[str(per)] = js_per
+        jsd[str(gp.period)] = js_per
 
     with open(target, "w+", encoding="UTF-8") as f:
         json.dump(jsd, f)

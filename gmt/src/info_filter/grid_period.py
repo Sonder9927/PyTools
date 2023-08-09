@@ -2,35 +2,27 @@ from pathlib import Path
 
 
 class GridPeriod:
-    def __init__(self, period, series) -> None:
+    def __init__(self, period, series=None) -> None:
         self.period = period
         self.series = series
         self.region = [115, 122.5, 27.9, 34.3]
 
-    def grid_tpwt(self):
-        grid = Path(f"grids/tpwt_grids/tpwt_{self.period}")
+    def grid_file(self, method: str, identifier: str) -> Path | None:
+        idt = check_identifier(identifier)
+        gsp = Path("grids")
+        grid = gsp / f"{method}_grids/{method}_{idt}_{self.period}.grid"
         return grid if grid.exists() else None
 
-    def grid_tpwt_cb(self):
-        grid = Path(f"grids/tpwt_grids/tpwt_cb_{self.period}")
-        return grid if grid.exists() else None
-
-    def grid_tpwt_std(self):
-        grid = Path(f"grids/tpwt_grids/tpwt_std_{self.period}")
-        return grid if grid.exists() else None
-
-    def grid_ant(self):
-        grid = Path(f"grids/ant_grids/ant_{self.period}")
-        return grid if grid.exists() else None
-
-    def tpwt_vel_name(self):
-        return f"images/tpwt_figs/tpwt_Vel_{self.period}.png"
-
-    def tpwt_as_name(self):
-        return f"images/tpwt_figs/tpwt_AS_{self.period}.png"
-
-    def tpwt_cb_name(self):
-        return f"images/tpwt_figs/tpwt_CB_{self.period}.png"
+    def fig_tpwt_name(self, identifier: str) -> str:
+        idt = check_identifier(identifier)
+        return f"images/tpwt_figs/tpwt_{idt.upper()}_{self.period}.png"
 
     def diff_name(self):
         return f"images/diff_figs/diff_{self.period}.png"
+
+
+def check_identifier(identifier: str) -> str:
+    ids = {"vel", "cb", "std", "as"}
+    if (idt := identifier.lower()) not in ids:
+        raise KeyError(f"identifier: {identifier}")
+    return idt

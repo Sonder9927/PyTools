@@ -159,13 +159,11 @@ def make_topo(topo, region, outfile, normalize, *, topo_grd=None):
         Path(TOPO_SAMPLE).rename(topo_grd)
 
 
-def diff_inner(grdfile: str, region, sta):
+def data_inner(grdfile: str, region, sta):
     # cut vel_diff_grd by the boundary of stations
     data = pygmt.grd2xyz(grdfile)
 
     boundary = info_filter.points_boundary(sta)
-    # fmt: off
-    data_inner = info_filter.points_inner(
-        data, boundary=boundary)  # pyright: ignore
+    data_inner = info_filter.points_inner(data, boundary=boundary)
 
     return pygmt.xyz2grd(data=data_inner, region=region, spacing=0.01)
