@@ -23,7 +23,7 @@ def main():
     3. plot dispersion curves from vel_info
     4. make ppt to show results
     """
-    # gmt_plot_all_periods(r"src/txt/periods_series.json")
+    gmt_plot_all_periods(r"src/txt/periods_series.json")
 
     vel_info(r"vel_info.json")
 
