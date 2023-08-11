@@ -15,7 +15,7 @@ tree:
 
 # run python scripts to update figs
 up:
-  python plot_result.py
+  python result_show.py
 
 # show figure
 show:

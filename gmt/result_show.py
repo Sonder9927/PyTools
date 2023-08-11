@@ -25,10 +25,9 @@ def main():
     """
     # gmt_plot_all_periods(r"src/txt/periods_series.json")
 
-    info_file = r"vel_info.json"
-    # vel_info(info_file)  # , periods)
+    vel_info(r"vel_info.json")
 
-    gmt_plot_dispersion_curves()
+    gmt_plot_dispersion_curves(r"src/txt/station.lst")
 
     # make_ppt(
     #     ppt_name=r"target/tpwt.pptx", figs=Path(r"images"), diff_info=info_file

@@ -29,7 +29,7 @@ def points_boundary(grids: pd.DataFrame):
     return points[hull.vertices]
 
 
-def points_inner(data: pd.DataFrame, boundary: list[Point]) -> pd.DataFrame:
+def points_inner(data: pd.DataFrame, boundary) -> pd.DataFrame:
     lo = [i[0] for i in boundary]
     la = [i[1] for i in boundary]
 
@@ -38,21 +38,18 @@ def points_inner(data: pd.DataFrame, boundary: list[Point]) -> pd.DataFrame:
         & (data["y"] > min(la))
         & (data["x"] < max(lo))
         & (data["x"] > min(lo))
-    ]
+    ].copy()
 
     boundary_points: list[Point] = [Point(p.tolist()) for p in boundary]
 
-    p_inner = []
-    for i in points_in_rect.index:
-        point = Point(x=points_in_rect.x[i], y=points_in_rect.y[i])
-
-        times = times_of_crossing_boundary(point, boundary_points)
-        if times % 2 == 1:
-            p_inner.append([point, points_in_rect.z[i]])
-
-    data = pd.DataFrame(
-        data=[[i[0].lo, i[0].la, i[1]] for i in p_inner],
-        columns=["x", "y", "z"],
+    points_in_rect["times"] = points_in_rect.apply(
+        lambda dd: times_of_crossing_boundary(
+            Point(x=dd.loc["x"], y=dd.loc["y"]), boundary_points
+        ),
+        axis=1,
+    )
+    data = points_in_rect[points_in_rect["times"] % 2 == 1].drop(
+        columns=["times"]
     )
 
     return data

@@ -3,7 +3,9 @@ from pathlib import Path
 
 import pandas as pd
 
-from .gmt import plot_as, plot_dispersion_curve, plot_diff, plot_vel
+from src import info_filter
+
+from .gmt import plot_as, plot_diff, plot_dispersion_curve, plot_vel
 from .info_filter import GridPeriod
 
 
@@ -37,7 +39,7 @@ def gmt_plot_all_periods(ps_file) -> None:
             )
 
 
-def gmt_plot_dispersion_curves():
+def gmt_plot_dispersion_curves(sta_file: str):
     """
     plot dispersion curves of tpwt and ant
     """
@@ -45,17 +47,21 @@ def gmt_plot_dispersion_curves():
     merged_ant = merge_periods_data(gp, "ant", "vel")
     merged_tpwt = merge_periods_data(gp, "tpwt", "vel")
     merged_data = pd.merge(merged_ant, merged_tpwt, on=["x", "y"], how="left")
+    # position of stations
+    sta = pd.read_csv(
+        sta_file,
+        usecols=[1, 2],
+        index_col=None,
+        header=None,
+        delim_whitespace=True,
+    )
+    boundary = info_filter.points_boundary(sta)
+    merged_inner = info_filter.points_inner(merged_data, boundary=boundary)
     save_path = Path("images") / "dispersion_curves"
     if not save_path.exists():
         save_path.mkdir()
-    for _, vs in merged_data.iterrows():
+    for _, vs in merged_inner.iterrows():
         plot_dispersion_curve(vs.to_dict(), save_path)
-
-    # plot_dc(
-    #     ant_dispersion,
-    #     tpwt_dispersion,
-    #     r"images/diff_figs/dispersion_curves.png",
-    # )
 
 
 def merge_periods_data(gp: Path, method: str, idt: str):

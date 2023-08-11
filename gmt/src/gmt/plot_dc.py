@@ -2,19 +2,33 @@ import pygmt
 import numpy as np
 
 
-def plot_dispersion_curve(vs, sp) -> None:
+def data_from_vs(vs: dict):
     x = vs.pop("x", None)
     y = vs.pop("y", None)
-    x_y = f"{x:.1f}_{y:.1f}"
-    fig_name = sp / f"dispersion_curve_{x_y}.png"
-    ant = []
-    tpwt = []
+    vvs = []
     for i, v in vs.items():
-        per = int(i.split("_")[1])
-        if "ant" in i:
-            ant.append([per, v])
-        elif "tpwt" in i:
-            tpwt.append([per, v])
+        per = i.split("_")[1]
+        if i.endswith("_x"):
+            ii = i[:-2]
+            vv = (vs[f"{ii}_x"] + vs[f"{ii}_x"]) / 2
+            vvs.append([int(per), vv])
+        elif not i.endswith("_y"):
+            vvs.append([int(per), v])
+    return x, y, sorted(vvs)
+
+
+def plot_dispersion_curve(vs, fsp) -> None:
+    x, y, vvs = data_from_vs(vs)
+    x_y = f"{x:.1f}_{y:.1f}"
+    fig_name = fsp / f"dispersion_curve_{x_y}.png"
+    # ant = []
+    # tpwt = []
+    # for i, v in vs.items():
+    #     per = int(i.split("_")[1])
+    #     if "ant" in i:
+    #         ant.append([per, v])
+    #     elif "tpwt" in i:
+    #         tpwt.append([per, v])
 
     fig = pygmt.Figure()
     region = [0, 150, 2.9, 4.3]
@@ -32,14 +46,14 @@ def plot_dispersion_curve(vs, sp) -> None:
         frame=["WeSn", r'xa20f5+l"Period (Sec)"', r'ya0.5f0.1+l"Vel (km/s)"'],
     )
     fig.plot(
-        data=np.array(sorted(ant)),
+        data=np.array(vvs),
         pen="0.8p,red",
     )
-    fig.plot(
-        data=np.array(sorted(tpwt)),
-        # error_bar="Y",
-        pen="0.4p,blue",
-    )
+    # fig.plot(
+    #     data=np.array(sorted(tpwt)),
+    #     # error_bar="Y",
+    #     pen="0.4p,blue",
+    # )
     fig.text(
         text=f"grid: {x_y.replace('_', ' X ')}",
         position="BR",
