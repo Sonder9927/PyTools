@@ -1,9 +1,10 @@
 ETOPO1.grd
+backup
 loop
 __pycache__
-src/*.bash
-temp/*
-target/*
+txt
+temp
+target
 images
-grids/*
-grids_
+grid*
+scripts

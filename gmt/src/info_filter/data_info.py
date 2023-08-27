@@ -4,10 +4,12 @@ import pandas as pd
 import pygmt
 import json
 
-from src import gmt  # pyright: ignore
+from src.pygmt_plot.gmt import (
+    gmt_blockmean_surface_grdsample,
+)
 
 from .points import points_boundary, points_inner
-from .grid_period import GridPeriod
+from .grid import GridPhv
 
 # from tpwt_r import Point
 
@@ -35,9 +37,9 @@ def vel_info_per(data_file: Path, points: list) -> dict:
 
 def standard_deviation_per(ant: Path, tpwt: Path, region, stas) -> float:
     temp = "temp/temp.grd"
-    gmt.gmt_blockmean_surface_grdsample(ant, temp, temp, region)
+    gmt_blockmean_surface_grdsample(ant, temp, temp, region)
     ant_xyz = pygmt.grd2xyz(temp)
-    gmt.gmt_blockmean_surface_grdsample(tpwt, temp, temp, region)
+    gmt_blockmean_surface_grdsample(tpwt, temp, temp, region)
     tpwt_xyz = pygmt.grd2xyz(temp)
     if ant_xyz is None or tpwt_xyz is None:
         raise ValueError(
@@ -74,7 +76,7 @@ def vel_info(target: str, periods=None):
         pg = gd.glob("*/*")
         periods = sorted([int(i.stem.split("_")[-1]) for i in pg])
 
-    gps = [GridPeriod(per) for per in periods]
+    gps = [GridPhv(per) for per in periods]
     jsd = {}
     for gp in gps:
         ant = gp.grid_file("ant", "vel")

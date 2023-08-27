@@ -1,7 +1,12 @@
 from .gmt_make_data import data_inner
 
 
-def fig_vel(fig, topo_grd, vel_grd, region, scale, title, cpts, topo_gra, sta):
+def fig_vel(
+    fig, topo_grd, vel_grd, region, scale, title, cpts, topo_gra, sta=None
+):
+    """
+    plot vel map
+    """
     fig.basemap(
         projection=scale,
         region=region,
@@ -12,17 +17,18 @@ def fig_vel(fig, topo_grd, vel_grd, region, scale, title, cpts, topo_gra, sta):
     # grdimage
     fig.grdimage(grid=topo_grd, cmap=cpts[0], shading=topo_gra)
     # cut vel_grd by the boundary of stations
-    fig.grdimage(grid=vel_grd, cmap=cpts[1], shading=topo_gra)
+    # fig.grdimage(grid=vel_grd, cmap=cpts[1], shading=topo_gra)
     vel_inner = data_inner(vel_grd, region, sta)
     fig.grdimage(grid=vel_inner, cmap=cpts[1], shading=topo_gra)
 
-    fig = fig_sta(fig, sta)
+    if sta is not None:
+        fig = fig_sta(fig, sta)
     return fig
 
 
 def fig_tomo(fig, grid, region, scale, title, cpt, topo_gra, sta):
     """
-    plot single fig of tpwt or ant
+    plot subfig of tpwt or ant in diff map
     """
     fig.basemap(
         projection=scale,

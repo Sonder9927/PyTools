@@ -1,4 +1,4 @@
-# set shell := ["fish", "-c"]
+set shell := ["fish", "-c"]
 
 vi := "lvim"
 
@@ -16,6 +16,12 @@ tree:
 # run python scripts to update figs
 up:
   python result_show.py
+
+# rsync mcmc
+rsmc:
+  rs wuzx@10.16.124.156:disk_01/mcmc/mcmc_merak/mc_figs images/
+  rs wuzx@10.16.124.156:disk_01/mcmc/mcmc_merak/vs.csv src/txt/vs.csv
+  rs wuzx@10.16.124.156:disk_01/mcmc/mcmc_merak/misfit.csv src/txt/misfit.csv
 
 # show figure
 show:

@@ -2,7 +2,7 @@
 # Version: 0.1.0
 # Description: plot diff between 2 grid files.
 
-from .gmt_make_data import make_topo, diff_make, data_inner
+from .gmt_make_data import topo_hplane, diff_make, data_inner
 from .gmt_fig import fig_tomo, fig_sta
 
 # from icecream import ic
@@ -96,12 +96,13 @@ def plot_diff(grid_tpwt, grid_ant, region, fig_name):
 
     diff_make(
         grid_ant, grid_tpwt, region, cptfile, ant_grd, tpwt_grd, diff_grd
-    )  # fmt: skip
+    )
     # topo file
-    TOPO = "src/txt/ETOPO1.grd"
-    TOPO_GRA = "temp/topo.gradient"
-    make_topo(TOPO, region, TOPO_GRA, "t")
+    topo = "ETOPO1.grd"
+    topo_data = f"src/txt/{topo}"
+    topo_gra = f"temp/topo_{topo.split('.')[0]}.gradient"
+    topo_hplane(topo_gra, region, "t", data=topo_data)
 
     gmt_plot_diff(
-        region, cptfile, tpwt_grd, ant_grd, diff_grd, TOPO_GRA, fig_name
+        region, cptfile, tpwt_grd, ant_grd, diff_grd, topo_gra, fig_name
     )  # fmt: skip
