@@ -16,10 +16,10 @@ from src.tpwt_show import PptMaker
 
 def make_ppt(ppt_name, figs: Path, diff_info):
     ppt = PptMaker(pn=ppt_name, fig_root=figs, remake=True)
+    ppt.add_mc_results(r"mc_figs")
     ppt.add_dispersion_curves(r"dispersion_curves")
     ppt.add_diffs(r"diff_figs", info_file=diff_info)
-    ppt.add_vels(r"tpwt_figs")
-    ppt.add_CBs(r"tpwt_figs")
+    ppt.add_tpwt_results(r"twpt_figs")
     ppt.save()
     ic()
 

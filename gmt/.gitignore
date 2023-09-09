@@ -1,6 +1,6 @@
 ETOPO1.grd
 backup
-loop
+mc_loop
 __pycache__
 txt
 temp

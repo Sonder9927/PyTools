@@ -8,36 +8,44 @@ def ppt_add_dcs(prs, figs, margin, shape):
     This script can insert r*c pictures of dispersion curve
     into a new slide of pptx.
     """
-    nrow, ncol = 5, 3  # shape
-    irow, icol = 0.382, 1  # itvel
-    [left_margin, top_margin] = margin
-    [width, height] = shape
-
-    # insert title slide
-    slide = prs.slides.add_slide(prs.slide_layouts[0])
-    title = slide.shapes.title
-    title.text = "Dispersion Curves"
-
+    config_param = {
+        "rc_n": [5, 3],
+        "rc_i": [0.382, 1],
+        "margin": margin,
+        "shape": shape,
+        "title": "Dispersion Curves",
+    }
     # make batch figs for every slide
-    batch = nrow * ncol
-    vel_figs = sorted(figs.glob("*"))
-    figs_batch = [
-        vel_figs[i: i + batch] for i in range(0, len(vel_figs), batch)
-    ]
+    dc_figs = sorted(figs.glob("*"))
+    return slide_add_batch_with_title(prs, dc_figs, config_param)
+
+
+def ppt_add_probs(prs, figs, margin, shape):
+    """
+    This script can insert r*c pictures of
+    probalCrs of all grids generated from mc
+    into a new slide of pptx.
+    """
+    config_param = {
+        "rc_n": [2, 2],
+        "rc_i": [0.8, 0.5],
+        "margin": margin,
+        "shape": shape,
+        "title": "probalCrs by mcmc",
+    }
+    # make batch figs for every slide
+    prob_figs = sorted(figs.glob("*prob*"))
+    return slide_add_batch_with_title(prs, prob_figs, config_param)
+
+
+def ppt_add_one_fig_per_slide(prs, figs, margin, idt):
+    [left, top] = margin
     blank_slide_layout = prs.slide_layouts[6]
-    for fb in figs_batch:
-        # new slide
+
+    for f in figs.glob(idt):
+        # insert one fig into new slide
         slide = prs.slides.add_slide(blank_slide_layout)
-
-        # add pictures
-        for i, f in enumerate(fb):
-            # set margin for each fig
-            left = util.Cm(left_margin + i % ncol * (width + icol))
-            top = util.Cm(top_margin + i // ncol * (height + irow))
-
-            slide.shapes.add_picture(
-                str(f), left, top, util.Cm(width), util.Cm(height)
-            )
+        slide.shapes.add_picture(str(f), util.Cm(left), util.Cm(top))
 
     return prs
 
@@ -50,8 +58,8 @@ def ppt_add_diffs(prs, figs: Path, info_file, margin):
     [left, top] = margin
     blank_slide_layout = prs.slide_layouts[6]
     # read vel info json
-    with open(info_file) as f:
-        info = json.load(f)
+    with open(info_file) as ff:
+        info = json.load(ff)
 
     for f in figs.glob("*diff*"):
         # insert diff fig into new slide
@@ -88,22 +96,31 @@ def ppt_add_single_type(prs, figs, margin, shape, idt):
     This script can insert r*c pictures
     into a new slide of pptx.
     """
-    nrow, ncol = 2, 3  # shape
-    irow, icol = 0.382, 1  # itvel
-    [left_margin, top_margin] = margin
-    [width, height] = shape
+    config_param = {
+        "rc_n": [2, 3],
+        "rc_i": [0.382, 1],
+        "margin": margin,
+        "shape": shape,
+        "title": f"{idt.replace(r'*','')} Results",
+    }
+    # make batch figs for every slide
+    pictures = sorted(figs.glob(idt), key=lambda p: int(p.stem.split(" ")[-1]))
+    return slide_add_batch_with_title(prs, pictures, config_param)
+
+
+def slide_add_batch_with_title(prs, figs, config):
+    nrow, ncol = config["rc_n"]  # shape
+    irow, icol = config["rc_i"]  # itvel
+    [left_margin, top_margin] = config["margin"]
+    [width, height] = config["shape"]
 
     # insert title slide
     slide = prs.slides.add_slide(prs.slide_layouts[0])
     title = slide.shapes.title
-    title.text = f"{idt[1:-1]} Results"
+    title.text = config["title"]
 
-    # make batch figs for every slide
     batch = nrow * ncol
-    vel_figs = sorted(figs.glob(idt), key=lambda p: int(p.stem.split("_")[-1]))
-    figs_batch = [
-        vel_figs[i : i + batch] for i in range(0, len(vel_figs), batch)
-    ]
+    figs_batch = [figs[i: i + batch] for i in range(0, len(figs), batch)]
     blank_slide_layout = prs.slide_layouts[6]
     for fb in figs_batch:
         # new slide
