@@ -40,14 +40,16 @@ def main():
         if not fpd.exists():
             fpd.mkdir()
 
+    txt = Path(r"src/txt")
+
     # # phase result
     # gmt_plot_all_periods(r"src/txt/periods_series.json")
     # vel_info(r"vel_info.json")
     # gmt_plot_dispersion_curves(r"src/txt/station.lst")
 
     # mc result
-    gmt_plot_misfit(r"src/txt/misfit.csv")
-    gmt_plot_vs(r"src/txt/vs.csv")
+    # gmt_plot_misfit(txt / "misfit_moho.csv")
+    gmt_plot_vs(txt / "vs.csv", txt / "misfit_moho.csv")
 
     # make_ppt(
     #   ppt_name=r"target/tpwt.pptx", figs=Path(r"images"), diff_info=info_file

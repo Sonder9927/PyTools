@@ -1,4 +1,4 @@
-from .gmt_make_data import data_inner, gmt_blockmean_surface_grdsample
+from .gmt_make_data import sta_clip, gmt_blockmean_surface_grdsample
 from .plot_as import plot_as
 from .plot_dc import plot_dc, plot_dispersion_curve
 from .plot_diff import plot_diff
@@ -12,7 +12,7 @@ __all__ = [
     "plot_vel",
     "plot_as",
     "gmt_blockmean_surface_grdsample",
-    "data_inner",
+    "sta_clip",
     "plot_dc",
     "plot_dispersion_curve",
     "plot_misfit",

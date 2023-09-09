@@ -2,27 +2,13 @@ import pandas as pd
 from pathlib import Path
 import pygmt
 
-from .gmt_make_data import topo_hplane, tomo_grid_data, get_info
+from .gmt_make_data import topo_gradient, tomo_grid_data, get_info
 from .gmt_fig import fig_vel
 
 
 def gmt_plot_vel(region, cpts, topo_grd, vel_grd, topo_gra, fname):
-    fig = pygmt.Figure()
-
-    # projection
-    x = (region[0] + region[1]) / 2
-    y = (region[2] + region[3]) / 2
-    SCALE = f"m{x}/{y}/0.3i"
-    # position of stations
-    sta = pd.read_csv(
-        "src/txt/station.lst",
-        usecols=[1, 2],
-        index_col=None,
-        header=None,
-        delim_whitespace=True,
-    )
-
     # gmt plot
+    fig = pygmt.Figure()
     # define figure configuration
     pygmt.config(
         MAP_FRAME_TYPE="plain",
@@ -33,13 +19,19 @@ def gmt_plot_vel(region, cpts, topo_grd, vel_grd, topo_gra, fname):
 
     # plot vel fig
     title = Path(fname).stem
-    fig = fig_vel(
-        fig, topo_grd, vel_grd, region, SCALE, title, cpts, topo_gra, sta
-    )  # fmt: skip
+    # position of stations
+    sta = pd.read_csv(
+        "src/txt/station.lst",
+        usecols=[1, 2],
+        index_col=None,
+        header=None,
+        delim_whitespace=True,
+    )
+    fig = fig_vel(fig, topo_grd, vel_grd, region, title, cpts, topo_gra, sta)
     # plot colorbar
     fig.colorbar(
         cmap=cpts[1], position="jBC+w5c/0.4c+o0c/-1.5c+m", frame="xa0.1f0.1"
-    )  # fmt: skip
+    )
 
     fig.savefig(fname)
 
@@ -73,17 +65,10 @@ def plot_vel(grid, region, fig_name, series=None) -> None:
     tomo_grid_data(grid, vel_grd, region)
 
     # topo file
-    topo = r"01m.grd"
-    topo_grd = f"temp/topo_{topo}"
-    topo_gra = f"temp/topo_{topo.split('.')[0]}.gradient"
-    # topo_data = pygmt.datasets.load_earth_relief(
-    #     resolution="01m", region=region, registration="gridline"
-    # )
-    topo_hplane(topo_gra, region, "e0.5", resolution="01m", grd=topo_grd)
-    # topo_gra = topo_hplane(topo_data, topo_grd, region, "e0.5")
-    # TOPO_GRA = "temp/topo.gradient"
-    # if not Path(topo_grd).exists():
-    # topo_hplane(TOPO, region, TOPO_GRA, "e0.5", topo_grd=topo_grd)
+    topo = r"01m"
+    topo_grd = f"temp/topo_{topo}.grd"
+    topo_gra = f"temp/topo_{topo}.gradient"
+    topo_gradient(topo_gra, region, "e0.5", resolution="01m", grd=topo_grd)
 
     # gmt plot
     gmt_plot_vel(region, [cptg, cptvel], topo_grd, vel_grd, topo_gra, fig_name)

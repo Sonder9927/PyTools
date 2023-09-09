@@ -53,7 +53,7 @@ def standard_deviation_per(ant: Path, tpwt: Path, region, stas) -> float:
 
     # make diff
     diff = tpwt_xyz
-    diff.z = (tpwt_xyz.z - ant_xyz.z) * 1000  # 0.5 X 0.5 grid
+    diff["z"] = (tpwt_xyz["z"] - ant_xyz["z"]) * 1000  # 0.5 X 0.5 grid
 
     boundary = points_boundary(stas)
     data_inner = points_inner(diff, boundary=boundary)
