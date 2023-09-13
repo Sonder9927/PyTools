@@ -108,3 +108,12 @@ def vel_info(target: str, periods=None):
 
     with open(target, "w+", encoding="UTF-8") as f:
         json.dump(jsd, f)
+
+
+def truncate_misfit(mmf, limit, savefile=None):
+    mmf = pd.read_csv(mmf)
+    misfit = mmf[["x", "y", "misfit"]]
+    result = misfit[misfit["misfit"] > limit]
+    if savefile is not None:
+        result.to_csv(savefile, index=None)
+    return result

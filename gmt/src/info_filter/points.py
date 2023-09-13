@@ -1,8 +1,11 @@
-from tpwt_r import Point
+from functools import reduce
+import math
+import operator
 
-from scipy.spatial import ConvexHull
-import pandas as pd
 import numpy as np
+import pandas as pd
+from scipy.spatial import ConvexHull
+from tpwt_r import Point  # pyright: ignore
 
 
 def times_of_crossing_boundary(point: Point, points: list[Point]) -> int:
@@ -19,14 +22,38 @@ def times_of_crossing_boundary(point: Point, points: list[Point]) -> int:
 ###############################################################################
 
 
-def points_boundary(grids: pd.DataFrame):
+def clock_sorted(points):
+    center = tuple(
+        map(
+            operator.truediv,
+            reduce(lambda x, y: map(operator.add, x, y), points),
+            [len(points)] * 2,
+        )
+    )
+    return sorted(
+        points,
+        key=lambda p: (
+            -135
+            - math.degrees(
+                math.atan2(*tuple(map(operator.sub, p, center))[::-1])
+            )
+        )
+        % 360,
+        reverse=True,
+    )
+
+
+def points_boundary(grids: pd.DataFrame, clock=False):
     """
     Get the boundary of points getted from the file.
     """
-    points = np.array(grids)
-    hull = ConvexHull(points)
+    data = np.array(grids)
+    hull = ConvexHull(data)
+    points = data[hull.vertices]
+    if clock:
+        points = clock_sorted(points)
 
-    return points[hull.vertices]
+    return points
 
 
 def points_inner(data: pd.DataFrame, boundary) -> pd.DataFrame:

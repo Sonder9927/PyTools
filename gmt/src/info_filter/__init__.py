@@ -1,5 +1,5 @@
+from .data_info import truncate_misfit, vel_info
 from .grid import GridPhv, GridVplane
-from .data_info import vel_info
 from .points import points_boundary, points_inner
 
 __all__ = [
@@ -8,4 +8,5 @@ __all__ = [
     "vel_info",
     "points_boundary",
     "points_inner",
+    "truncate_misfit",
 ]

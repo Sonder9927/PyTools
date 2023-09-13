@@ -27,7 +27,7 @@ def ppt_add_probs(prs, figs, margin, shape):
     into a new slide of pptx.
     """
     config_param = {
-        "rc_n": [2, 2],
+        "rc_n": [2, 3],
         "rc_i": [0.8, 0.5],
         "margin": margin,
         "shape": shape,
@@ -104,7 +104,7 @@ def ppt_add_single_type(prs, figs, margin, shape, idt):
         "title": f"{idt.replace(r'*','')} Results",
     }
     # make batch figs for every slide
-    pictures = sorted(figs.glob(idt), key=lambda p: int(p.stem.split(" ")[-1]))
+    pictures = sorted(figs.glob(idt), key=lambda p: int(p.stem.split("_")[-1]))
     return slide_add_batch_with_title(prs, pictures, config_param)
 
 

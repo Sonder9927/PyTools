@@ -1,35 +1,50 @@
 # from icecream import ic
+from pathlib import Path
 import pandas as pd
 import pygmt
 from src import info_filter
+
 # import xarray as xr
 
 # from .gmt_make_data import gmt_blockmean_surface_grdsample
 
 
-def vplane_makecpt(cmoho, clab, ctopo):
-    # cmap = "src/txt/gridvel_6_v3.cpt"
-    cmap = "seis"
-    pygmt.makecpt(
-        cmap=cmap,
-        series=[2.8, 4.2, 0.01],
-        output=cmoho,
-        continuous=True,
-        background=True,
-    )
-    pygmt.makecpt(
-        cmap=cmap,
-        series=[4, 5, 0.01],
-        output=clab,
-        continuous=True,
-        background=True,
-    )
-    pygmt.makecpt(
-        cmap="grayC",
-        series=[-100, 2000, 200],
-        continuous=True,
-        output=ctopo,
-    )
+def vplane_makecpt(cmoho: str, clab, ctopo, cave):
+    # cmap = "src/txt/gridvel_6_v3.cpt"  # range is [-6,6]
+    cmap = "seis"  # rangeis [0, 1]
+    if not Path(cmoho).exists():
+        pygmt.makecpt(
+            cmap=cmap,
+            series=[3.2, 4.1, 0.01],
+            # truncate=[0.05, 0.85],
+            output=cmoho,
+            continuous=True,
+            background=True,
+        )
+    if not Path(clab).exists():
+        pygmt.makecpt(
+            cmap=cmap,
+            series=[4, 4.9, 0.01],
+            # truncate=[0.05, 0.85],
+            output=clab,
+            continuous=True,
+            background=True,
+        )
+    if not Path(cave).exists():
+        pygmt.makecpt(
+            cmap=cmap,
+            series=[-10, 10, 0.05],
+            output=cave,
+            continuous=True,
+            background=True,
+        )
+    if not Path(ctopo).exists():
+        pygmt.makecpt(
+            cmap="grayC",
+            series=[-100, 2000, 200],
+            continuous=True,
+            output=ctopo,
+        )
 
 
 def vplane_clip_data(grid, boundary, region):

@@ -133,10 +133,13 @@ def get_info(grd_file: str, ndigits: int = 1) -> list[float]:
 
 
 def sta_clip(grdfile: str, region, sta):
+    # # TODO use pygmt.select
+    # sta_boundary = info_filter.points_boundary(sta)
+    # grd = pygmt.select(data=vel_grd, polygon=sta_boundary)
     # cut vel_diff_grd by the boundary of stations
     data = pygmt.grd2xyz(grdfile)
 
-    boundary = info_filter.points_boundary(sta)
+    boundary = info_filter.points_boundary(sta, clock=True)
     data_inner = info_filter.points_inner(data, boundary=boundary)
 
     return pygmt.xyz2grd(data=data_inner, region=region, spacing=0.01)

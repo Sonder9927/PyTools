@@ -10,7 +10,7 @@ def data_from_vs(vs: dict):
         per = i.split("_")[1]
         if i.endswith("_x"):
             ii = i[:-2]
-            vv = (vs[f"{ii}_x"] + vs[f"{ii}_x"]) / 2
+            vv = (vs[f"{ii}_x"] + vs[f"{ii}_y"]) / 2
             vvs.append([int(per), vv])
         elif not i.endswith("_y"):
             vvs.append([int(per), v])

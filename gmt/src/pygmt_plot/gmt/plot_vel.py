@@ -39,7 +39,7 @@ def gmt_plot_vel(region, cpts, topo_grd, vel_grd, topo_gra, fname):
 def plot_vel(grid, region, fig_name, series=None) -> None:
     # cpt file
     cptg = "temp/g.cpt"
-    cptvel = "temp/vel.cpt"
+    cptvel = "temp/vc18s.cpt"
     if series is None:
         series = get_info(grid)
         avg = sum(series) / 2

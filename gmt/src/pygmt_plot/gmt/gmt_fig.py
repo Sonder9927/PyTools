@@ -1,7 +1,7 @@
 from .gmt_make_data import sta_clip
 
 
-def fig_vel(fig, topo_grd, vel_grd, region, title, cpts, topo_gra, sta=None):
+def fig_vel(fig, topo_grd, vel_grd, region, title, cpts, gra, sta=None):
     """
     plot vel map
     """
@@ -10,31 +10,26 @@ def fig_vel(fig, topo_grd, vel_grd, region, title, cpts, topo_gra, sta=None):
         region=region,
         frame=[f'WSne+t"{title}"', "xa2f2", "ya2f2"],
     )
-
-    fig.coast(shorelines="", resolution="l", land="white", area_thresh=10_000)
+    # fig.coast(resolution="l", land="white", area_thresh=10_000)
     # grdimage
-    fig.grdimage(grid=topo_grd, cmap=cpts[0], shading=topo_gra)
+    fig.grdimage(grid=topo_grd, cmap=cpts[0], shading=gra)
     # cut vel_grd by the boundary of stations
-    # fig.grdimage(grid=vel_grd, cmap=cpts[1], shading=topo_gra)
-    vel_inner = sta_clip(vel_grd, region, sta)
-    fig.grdimage(
-        grid=vel_inner, cmap=cpts[1], shading=topo_gra, nan_transparent=True
-    )
-
-    if sta is not None:
-        fig = fig_sta(fig, sta)
-    return fig
+    if sta is None:
+        fig.grdimage(grid=vel_grd, cmap=cpts[1], shading=gra)
+    else:
+        grd = sta_clip(vel_grd, region, sta)
+        fig.grdimage(grid=grd, cmap=cpts[1], shading=gra, nan_transparent=True)
+    return fig_lines_and_sta(fig, sta)
 
 
-def fig_vtomo(fig, tomos, cpts, *, moho, region):
+def fig_vtomo(fig, tomos: list, cpts: list, *, moho, region):
     fig.basemap(
         projection="X6i/2i",
         region=region,
         frame=["WSne", "xa2f2", "ya50f50"],
     )
-    # grdimage
-    fig.grdimage(grid=tomos["lab"], cmap=cpts["lab"])
-    fig.grdimage(grid=tomos["moho"], cmap=cpts["moho"], nan_transparent=True)
+    for t, c in zip(tomos, cpts):
+        fig.grdimage(grid=t, cmap=c, nan_transparent=True)
     fig.plot(data=moho, pen="1p,black,-")
 
     return fig
@@ -57,8 +52,8 @@ def fig_htopo(fig, grd, cmap, region, gra, line):
         region=region,
         frame=["WSne", "xa4f2", "ya4f2"],
     )
-    fig.coast(shorelines="", resolution="l", land="white", area_thresh=10_000)
     fig.grdimage(grid=grd, cmap=cmap, shading=gra)
+    fig = fig_lines_and_sta(fig)
     fig.plot(data=line, pen="fat,red")
     return fig
 
@@ -67,26 +62,15 @@ def fig_htomo(fig, grid, region, title, cpt, topo_gra, sta=None):
     """
     plot subfig of tpwt or ant in diff map
     """
-    fig.coast(
+    fig.basemap(
         projection=_hscale(region),
         region=region,
         frame=[f'WSne+t"{title}"', "xa2f2", "ya2f2"],
-        shorelines="",
-        resolution="l",
-        land="white",
-        area_thresh=10_000,
     )
+    fig.coast(resolution="l", land="white", area_thresh=10_000)
     # grdimage
-    fig.grdimage(
-        grid=grid,
-        cmap=cpt,
-        shading=topo_gra,
-    )
-
-    if sta is not None:
-        fig = fig_sta(fig, sta)
-
-    return fig
+    fig.grdimage(grid=grid, cmap=cpt, shading=topo_gra, nan_transparent=True)
+    return fig_lines_and_sta(fig, sta)
 
 
 def fig_diff(fig, diff, region, title, cpt, topo_gra, sta):
@@ -94,7 +78,6 @@ def fig_diff(fig, diff, region, title, cpt, topo_gra, sta):
         region=region,
         projection=_hscale(region),
         frame=[f"WSne+t{title}", "xa2f2", "ya2f2"],
-        shorelines="",
         resolution="l",
         land="white",
         area_thresh=10_000,
@@ -104,7 +87,7 @@ def fig_diff(fig, diff, region, title, cpt, topo_gra, sta):
     diff = sta_clip(diff, region, sta)
     fig.grdimage(grid=diff, cmap=cpt, shading=topo_gra, nan_transparent=True)
 
-    fig = fig_sta(fig, sta)
+    fig = fig_lines_and_sta(fig, sta)
 
     # colorbar
     fig.colorbar(
@@ -114,17 +97,15 @@ def fig_diff(fig, diff, region, title, cpt, topo_gra, sta):
     return fig
 
 
-def fig_sta(fig, sta):
-    # station
-    fig.plot(
-        data=sta,
-        style="t0.1c",
-        fill="blue",
-        pen="black",
-    )
+def fig_lines_and_sta(fig, sta=None):
+    # stations and China_tectonic
+    # lines
+    fig.coast(shorelines="1/0.5p,black")
     # fig.plot(data="ncc_lv.xy", pen="0.8p,black")
     fig.plot(data="src/txt/China_tectonic.dat", pen="thick,black,-")
-
+    if sta is None:
+        return fig
+    fig.plot(data=sta, style="t0.1c", fill="blue", pen="black")
     return fig
 
 

@@ -35,9 +35,8 @@ def plot_misfit(grid, region, fig_name) -> None:
 
 
 def gmt_plot_misfit(region, cpt, tomo_grd, topo_gra, fname):
-    fig = pygmt.Figure()
-
     # gmt plot
+    fig = pygmt.Figure()
     # define figure configuration
     pygmt.config(
         MAP_FRAME_TYPE="plain",

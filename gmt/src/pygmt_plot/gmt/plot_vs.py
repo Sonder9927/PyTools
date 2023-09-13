@@ -10,7 +10,9 @@ from .plane import vplane_clip_data, vplane_makecpt
 
 
 # plot v plane
-def plot_vs_vplane(vs, idt, *, moho, line, path, hregion, fname):
+def plot_vs_vplane(
+    vs, idt, *, moho, line, path, hregion, fname, dep=-250, ave=False
+):
     """
     gmt plot vplane of vs contain abso and ave.
     The abscissa is determined by `idt` which should be x or y.
@@ -23,23 +25,12 @@ def plot_vs_vplane(vs, idt, *, moho, line, path, hregion, fname):
     else:
         raise KeyError("Please select `x` or `y` for abscissa of vplane")
     # vregion = [hregion[idtn * 2], hregion[idtn * 2 + 1], -250, 0]
-    lregion = sorted([r[idtn] for r in line]) + [-250, 0]
+    lregion = sorted([r[idtn] for r in line]) + [dep, 0]
     temp = Path("temp")
-
-    # make tomo files: moho lab topo
     # moho
     promoho = moho[[idt, "z"]]
     promoho.columns = ["x", "y"]
-    # vs grids
-    grid = vs[[idt, "z", "v"]]
-    grid.columns = ["x", "y", "z"]
-    vs_grd = temp / "vs.grd"
-    tomo_grid_data(grid, vs_grd, lregion, blockmean=[0.5, 1])
-    ic("Maked vs.grd. clipping moho from it...")
-    # cut vs_grd to tomo_moho and tomo_lab
-    tomo_moho = vplane_clip_data(vs_grd, promoho, lregion)
-    ic("Maked moho data!")
-    # topo gradient
+    # protopo
     topo = "ETOPO1"
     topo_data = f"src/txt/{topo}.grd"
     protopo: pd.DataFrame = pygmt.grdtrack(
@@ -51,19 +42,35 @@ def plot_vs_vplane(vs, idt, *, moho, line, path, hregion, fname):
     )  # pyright: ignore
     protopo.columns = ["x", "y", "n", "z"]
     protopo = protopo[[idt, "z"]]
-
+    # topo gradient
     topo_gra = temp / f"topo_{topo}.gradient"
     topo_grd = temp / f"topo_{topo}.grd"
     topo_gradient(topo_gra, hregion, "t", data=topo_data, grd=topo_grd)
 
-    # make cpt file
-    cptfiles = [str(temp / c) for c in ["moho.cpt", "lab.cpt", "topo.cpt"]]
+    # make cpt files
+    cptfiles = [
+        str(temp / c)
+        for c in ["crust.cpt", "lithos.cpt", "topo_gray.cpt", "ave.cpt"]
+    ]
     vplane_makecpt(*cptfiles)
-
-    # plot
-    targets = ["moho", "lab", "topo"]
-    tomos = dict(zip(targets, [tomo_moho, vs_grd, topo_grd]))
+    targets = ["crust", "lithos", "topo", "ave"]
     cpts = dict(zip(targets, cptfiles))
+
+    # vs grid
+    grid = vs[[idt, "z", "v"]]
+    grid.columns = ["x", "y", "z"]
+    vs_grd = temp / "vs.grd"
+    tomo_grid_data(grid, vs_grd, lregion, blockmean=[0.5, 1])
+    tomos = dict(zip(["vs", "topo"], [vs_grd, topo_grd]))
+    suffix = "_ave"
+    if not ave:
+        ic("Clipping moho from vs.grd...")
+        # cut tomo_moho from vs_grd
+        tomos["moho"] = vplane_clip_data(vs_grd, promoho, lregion)
+        ic("Maked moho data!")
+        suffix = "_vel"
+
+    fname = f"{fname}_{idt}{suffix}.png"
     ic("figing...")
     gmt_plot_vs_vplane(
         tomos,
@@ -74,7 +81,8 @@ def plot_vs_vplane(vs, idt, *, moho, line, path, hregion, fname):
         topo=protopo,
         gra=topo_gra,
         line=line,
-        fname=f"{fname}_{idt}.png",
+        fname=fname,
+        ave=ave,
     )
 
 
@@ -109,7 +117,7 @@ def plot_vs_hplane(grid, region, fname):
 
 # gmt plot v plane
 def gmt_plot_vs_vplane(
-    tomos, cpts, hregion, vregion, moho, topo, gra, line, fname
+    tomos, cpts, hregion, vregion, moho, topo, gra, line, fname, ave
 ):
     # gmt plot
     fig = pygmt.Figure()
@@ -121,23 +129,34 @@ def gmt_plot_vs_vplane(
         MAP_DEGREE_SYMBOL="none",
         FONT_TITLE="18",
     )
-    fig = fig_vtomo(fig, tomos, cpts, moho=moho, region=vregion)
-    fig.shift_origin(yshift="-2.5")
-    fig.colorbar(
-        cmap=cpts["moho"],
-        position="JBC+w3i/0.10i+o0c/-0.5i+h",
-        frame="xa0.2f0.2",
-    )
-    fig.shift_origin(yshift="-1.5")
-    fig.colorbar(
-        cmap=cpts["lab"],
-        position="JBC+w3i/0.10i+o0c/-0.5i+h",
-        frame="xa0.2f0.2",
-    )
-    fig.shift_origin(yshift="10")
     fig = fig_vtopo(fig, topo, vregion[:2] + [0, 6000], title)
-
-    fig.shift_origin(yshift="-18")
+    fig.shift_origin(yshift="-5.5")
+    if ave:
+        cmap = cpts["ave"]
+        fig = fig_vtomo(fig, [tomos["vs"]], [cmap], moho=moho, region=vregion)
+        fig.shift_origin(yshift="-2")
+        fig.colorbar(
+            cmap=cmap,
+            position="JBC+w3i/0.10i+o0c/-0.5i+h",
+            frame="xa2f2",
+        )
+    else:
+        tms = [tomos[i] for i in ["vs", "moho"]]
+        cs = [cpts[i] for i in ["lithos", "crust"]]
+        fig = fig_vtomo(fig, tms, cs, moho=moho, region=vregion)
+        fig.shift_origin(yshift="-2")
+        fig.colorbar(
+            cmap=cpts["crust"],
+            position="JBC+w3i/0.10i+o0c/-0.5i+h",
+            frame="xa0.2f0.2",
+        )
+        fig.shift_origin(yshift="-1")
+        fig.colorbar(
+            cmap=cpts["lithos"],
+            position="JBC+w3i/0.10i+o0c/-0.5i+h",
+            frame="xa0.2f0.2",
+        )
+    fig.shift_origin(yshift="-4.5", xshift="3")
     fig = fig_htopo(fig, tomos["topo"], cpts["topo"], hregion, gra, line)
 
     fig.savefig(fname)
