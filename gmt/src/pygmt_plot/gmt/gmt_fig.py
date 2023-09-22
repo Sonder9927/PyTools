@@ -22,7 +22,7 @@ def fig_vel(fig, topo_grd, vel_grd, region, title, cpts, gra, sta=None):
     return fig_lines_and_sta(fig, sta)
 
 
-def fig_vtomo(fig, tomos: list, cpts: list, *, moho, region):
+def fig_vtomo(fig, tomos: list, cpts: list, region, borders: dict):
     fig.basemap(
         projection="X6i/2i",
         region=region,
@@ -30,17 +30,19 @@ def fig_vtomo(fig, tomos: list, cpts: list, *, moho, region):
     )
     for t, c in zip(tomos, cpts):
         fig.grdimage(grid=t, cmap=c, nan_transparent=True)
-    fig.plot(data=moho, pen="1p,black,-")
+    for bb in borders.values():
+        fig.plot(data=bb, pen="1p,black,-")
 
     return fig
 
 
 def fig_vtopo(fig, topo, region, title):
+    v = int(region[-1] / 4)
     fig.plot(
         data=topo,
         projection="X6i/0.5i",
         region=region,
-        frame=[f"sW+t{title}", "ya3000f3000"],
+        frame=[f"sW+t{title}", f"ya{v}f{v}"],
         pen="4",
     )
     return fig

@@ -21,7 +21,7 @@ def gmt_plot_all_periods(ps_file) -> None:
             continue
         # plot vel of tpwt
         plot_vel(grid_tpwt, gp.region, gp.fig_tpwt_name("Vel"), gp.series)
-        return
+        # return
 
         # plot diff
         if grid_ant := gp.grid_file("ant", "vel"):

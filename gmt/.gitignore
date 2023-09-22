@@ -3,7 +3,7 @@ backup
 mc_loop
 __pycache__
 txt
-temp
+temp*
 target
 images
 grid*

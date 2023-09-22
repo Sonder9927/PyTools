@@ -89,8 +89,10 @@ def tomo_grid_data(data, outgrid, region, *, preffix="", **spacings) -> str:
 
 
 def gmt_blockmean_surface_grdsample(
-    data, bm_output, sf_output, region, *, outgrid=None, spacings={}
+    data, bm_output, sf_output, region, *, outgrid=None, spacings=None
 ):
+    if spacings is None:
+        spacings = {}
     # blockmean
     pygmt.blockmean(
         data=data,
