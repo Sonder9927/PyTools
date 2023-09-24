@@ -10,9 +10,9 @@ from src import info_filter
 
 
 def vplane_makecpt(cmoho: str, clab, ctopo, cVave):
-    # cmap = "src/txt/gridvel_6_v3.cpt"  # range is [-6,6]
-    cmap = "seis"  # rangeis [0, 1]
-    cmap = "jet"
+    cmap = "src/txt/cptfiles/seismic.cpt"
+    cmap = "polar"
+    # crust
     pygmt.makecpt(
         cmap=cmap,
         series=[3.2, 4.1, 0.01],
@@ -20,7 +20,9 @@ def vplane_makecpt(cmoho: str, clab, ctopo, cVave):
         output=cmoho,
         continuous=True,
         background=True,
+        reverse=True,
     )
+    # lithos
     pygmt.makecpt(
         cmap=cmap,
         series=[4, 4.9, 0.01],
@@ -28,13 +30,16 @@ def vplane_makecpt(cmoho: str, clab, ctopo, cVave):
         output=clab,
         continuous=True,
         background=True,
+        reverse=True,
     )
+    # ave
     pygmt.makecpt(
-        cmap=cmap,
-        series=[-20, 20, 0.1],
+        cmap="polar",
+        series=[-15, 15, 0.1],
         output=cVave,
         continuous=True,
         background=True,
+        reverse=True,
     )
     if not Path(ctopo).exists():
         pygmt.makecpt(

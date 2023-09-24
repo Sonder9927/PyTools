@@ -21,13 +21,12 @@ def gmt_plot_all_periods(ps_file) -> None:
             continue
         # plot vel of tpwt
         plot_vel(grid_tpwt, gp.region, gp.fig_tpwt_name("Vel"), gp.series)
-        # return
 
         # plot diff
         if grid_ant := gp.grid_file("ant", "vel"):
             plot_diff(grid_tpwt, grid_ant, gp.region, gp.diff_name())
         # plot checkboard of tpwt
-        if grid_tpwt_cb := gp.grid_file("tpwt", "cb"):
+        if grid_tpwt_cb := gp.grid_file("tpwt", "cb", "2.0"):
             plot_vel(grid_tpwt_cb, gp.region, gp.fig_tpwt_name("CB"))
         # plot std of tpwt
         if grid_tpwt_std := gp.grid_file("tpwt", "std"):

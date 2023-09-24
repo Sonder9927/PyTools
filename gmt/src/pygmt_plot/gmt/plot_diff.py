@@ -32,7 +32,7 @@ def gmt_plot_diff(region, cpt, tpwt_grd, ant_grd, diff_grd, topo_gra, fname):
     # plot tpwt fig
     fig = fig_htomo(fig, tpwt_grd, region, "tpwt", cpt, topo_gra, sta)
     # shift plot origin of the second fig by 12 cm in x direction
-    fig.shift_origin(xshift="10c")
+    fig.shift_origin(xshift="6c")
     # plot ant fig
     fig = fig_htomo(fig, ant_grd, region, "ant", cpt, topo_gra, sta)
     # plot colorbar
@@ -41,7 +41,7 @@ def gmt_plot_diff(region, cpt, tpwt_grd, ant_grd, diff_grd, topo_gra, fname):
     )
 
     # plot diff
-    fig.shift_origin(xshift="-10c", yshift="-8c")
+    fig.shift_origin(xshift="-6c", yshift="-7c")
     cpt_diff = "src/txt/vs_dif.cpt"
     diff_title = Path(fname).stem
     fig = fig_diff(fig, diff_grd, region, diff_title, cpt_diff, topo_gra, sta)
@@ -51,7 +51,7 @@ def gmt_plot_diff(region, cpt, tpwt_grd, ant_grd, diff_grd, topo_gra, fname):
 
 def plot_diff(grid_tpwt, grid_ant, region, fig_name):
     # cpt file
-    cptfile = "temp/test.cpt"
+    cptfile = "temp/diff_temp.cpt"
     # grd file
     ant_grd = "temp/vel_ant.grd"
     tpwt_grd = "temp/vel_tpwt.grd"

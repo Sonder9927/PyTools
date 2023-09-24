@@ -16,7 +16,7 @@ def ppt_add_dcs(prs, figs, margin, shape):
         "title": "Dispersion Curves",
     }
     # make batch figs for every slide
-    dc_figs = sorted(figs.glob("*"))
+    dc_figs = sorted(figs.rglob("*.png"))
     return slide_add_batch_with_title(prs, dc_figs, config_param)
 
 
@@ -34,7 +34,7 @@ def ppt_add_probs(prs, figs, margin, shape):
         "title": "probalCrs by mcmc",
     }
     # make batch figs for every slide
-    prob_figs = sorted(figs.glob("*prob*"))
+    prob_figs = sorted(figs.rglob("*/*prob*"))
     return slide_add_batch_with_title(prs, prob_figs, config_param)
 
 
@@ -91,7 +91,7 @@ def ppt_add_diffs(prs, figs: Path, info_file, margin):
     return prs
 
 
-def ppt_add_single_type(prs, figs, margin, shape, idt):
+def ppt_add_single_type(prs, figs, margin, shape, idt, key):
     """
     This script can insert r*c pictures
     into a new slide of pptx.
@@ -104,7 +104,7 @@ def ppt_add_single_type(prs, figs, margin, shape, idt):
         "title": f"{idt.replace(r'*','')} Results",
     }
     # make batch figs for every slide
-    pictures = sorted(figs.glob(idt), key=lambda p: int(p.stem.split("_")[-1]))
+    pictures = sorted(figs.glob(idt), key=key)
     return slide_add_batch_with_title(prs, pictures, config_param)
 
 

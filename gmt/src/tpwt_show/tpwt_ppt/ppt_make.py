@@ -16,17 +16,9 @@ class PptMaker:
         self.ppt_name = pn
         self.figs = fig_root
         self.margin = [0.789, 0.567]
-        self.shape = {"phv": [7, 8.5], "dc": [6.8, 3.2], "prob": [7, 9]}
+        self.shape = {"h1": [7, 8.5], "dc": [6.8, 3.2], "prob": [7, 9]}
         # create a new instance for pptx
         self.prs = self._ppt(remake)
-
-    def _ppt(self, remake):
-        prs = Presentation() if remake else Presentation(self.ppt_name)
-        # make first slide
-        slide = prs.slides.add_slide(prs.slide_layouts[0])
-        title = slide.shapes.title
-        title.text = "Results Show"
-        return prs
 
     def add_mc_results(self, mc_dir):
         mc = self.figs / mc_dir
@@ -34,10 +26,23 @@ class PptMaker:
         self.prs = ppt_add_one_fig_per_slide(
             self.prs, mc, self.margin, "misfit"
         )
-        # vs
-        self.prs = ppt_add_one_fig_per_slide(self.prs, mc, self.margin, "vs*")
         # probalCrs
-        self.prs = ppt_add_probs(self.prs, mc, self.margin, self.shape["prob"])
+        self.prs = ppt_add_probs(
+            self.prs, mc / "prob", self.margin, self.shape["prob"]
+        )
+        # vs depth
+        self.prs = ppt_add_single_type(
+            self.prs,
+            mc / "depth",
+            self.margin,
+            self.shape["h1"],
+            "vs*",
+            lambda p: int(p.stem.split("_")[-1][1:-4]),
+        )
+        # vs profile
+        self.prs = ppt_add_one_fig_per_slide(
+            self.prs, mc / "grid", self.margin, "vs*"
+        )
 
     def add_dispersion_curves(self, dcs_dir):
         """
@@ -58,20 +63,18 @@ class PptMaker:
     def add_tpwt_results(self, tpwt_dir):
         tpwt = self.figs / tpwt_dir
         # add phase vel of all periods
+        key = lambda p: int(p.stem.split("_")[-1])
         self.prs = ppt_add_single_type(
-            self.prs,
-            tpwt,
-            self.margin,
-            self.shape["phv"],
-            "*Vel*",
+            self.prs, tpwt / "phv", self.margin, self.shape["h1"], "*Vel*", key
         )
         # add check board of all periods
         self.prs = ppt_add_single_type(
             self.prs,
-            tpwt,
+            tpwt / "checkboard",
             self.margin,
-            self.shape["phv"],
+            self.shape["h1"],
             "*CB*",
+            key,
         )
 
     def save(self, target=None):
@@ -80,3 +83,11 @@ class PptMaker:
         """
         pn = target or self.ppt_name
         self.prs.save(pn)
+
+    def _ppt(self, remake):
+        prs = Presentation() if remake else Presentation(self.ppt_name)
+        # make first slide
+        slide = prs.slides.add_slide(prs.slide_layouts[0])
+        title = slide.shapes.title
+        title.text = "Results Show"
+        return prs

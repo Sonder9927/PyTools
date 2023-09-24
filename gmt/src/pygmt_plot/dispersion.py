@@ -10,6 +10,11 @@ def gmt_plot_dispersion_curves(sta_file: str):
     """
     plot dispersion curves of tpwt and ant
     """
+    dc_periods = {
+        "ant": [8, 10, 12, 14, 16, 18, 20],
+        "overlap": [25, 30],
+        "tpwt": [35, 40, 45, 50, 60, 70, 80, 90, 100, 111, 125, 143],
+    }
     gp = Path("grids")
     merged_ant = merge_periods_data(gp, "ant", "vel")
     merged_tpwt = merge_periods_data(gp, "tpwt", "vel")
@@ -28,7 +33,7 @@ def gmt_plot_dispersion_curves(sta_file: str):
     if not save_path.exists():
         save_path.mkdir()
     for _, vs in merged_inner.iterrows():
-        plot_dispersion_curve(vs.to_dict(), save_path)
+        plot_dispersion_curve(vs.to_dict(), dc_periods, save_path)
 
 
 def merge_periods_data(gp: Path, method: str, idt: str):

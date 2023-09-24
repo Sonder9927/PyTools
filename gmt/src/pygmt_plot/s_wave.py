@@ -10,12 +10,12 @@ def gmt_plot_vs(vf, mmf):
     gv = GridVplane(vf, mmf)
     r = gv.hregion
     # hplane
-    for _, data, fn in gv.depths_data(
-        ave=ave,
-        dep_filter=lambda d: (d % 30 == 0) or (d % 10 == 0 and d <= 60),
-    ):
-        plot_vs_hplane(data, r, fn, ave=ave)
-    return
+    # for _, data, fn in gv.depths_data(
+    #     ave=ave,
+    #     dep_filter=lambda d: (d % 50 == 0) or (d % 10 == 0 and d >= -60),
+    # ):
+    #     plot_vs_hplane(data, r, fn, ave=ave)
+    # return
 
     # vplane
     params = {"hregion": r}
@@ -25,7 +25,7 @@ def gmt_plot_vs(vf, mmf):
         params["moho"] = gv.track_moho(path)
         plot_vs_vplane(gv.track_vs(path), **params)
         plot_vs_vplane(gv.track_vs(path, ave), **params, ave=ave)
-        return
+        # return
 
 
 def lines_generator(region):

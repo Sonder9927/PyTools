@@ -68,13 +68,13 @@ def vel_info(target: str, periods=None):
     stas = pd.read_csv(
         sta_file, delim_whitespace=True, usecols=[1, 2], names=["x", "y"]
     )
-    boundary_points = points_boundary(stas[["x", "y"]])  # default is clock
+    boundary = points_boundary(stas[["x", "y"]])  # default is clock
     # po = clock_sorted(boundary_points)  # no need
 
     gd = Path("grids")
     if periods is None:
-        pg = gd.glob("*/*")
-        periods = sorted([int(i.stem.split("_")[-1]) for i in pg])
+        pg = gd.glob("*t_grids/*")
+        periods = sorted(list({int(i.stem.split("_")[-1]) for i in pg}))
 
     gps = [GridPhv(per) for per in periods]
     jsd = {}
@@ -82,12 +82,8 @@ def vel_info(target: str, periods=None):
         ant = gp.grid_file("ant", "vel")
         tpwt = gp.grid_file("tpwt", "vel")
 
-        ant_info = (
-            vel_info_per(ant, boundary_points) if ant is not None else {}
-        )
-        tpwt_info = (
-            vel_info_per(tpwt, boundary_points) if tpwt is not None else {}
-        )
+        ant_info = vel_info_per(ant, boundary) if ant is not None else {}
+        tpwt_info = vel_info_per(tpwt, boundary) if tpwt is not None else {}
 
         js_per = {}
 

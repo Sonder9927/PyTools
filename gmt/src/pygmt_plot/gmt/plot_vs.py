@@ -72,12 +72,13 @@ def plot_vs_vplane(
         suffix = "_vel"
 
     fname = f"{fname}_{idt}{suffix}.png"
-    ic("figing...")
     gmt_plot_vs_vplane(
         tomos,
         cpts,
         areas={"v": lregion, "h": hregion},
-        borders={"moho": promoho, "lab": lab_by_vel_gra(vs_grd)},
+        # TODO
+        # borders={"moho": promoho, "lab": lab_by_vel_gra(vs_grd)},
+        borders={"moho": promoho},
         topo=protopo,
         gra=topo_gra,
         line=line,
@@ -97,19 +98,21 @@ def plot_vs_hplane(grid, region, fname, *, ave):
     topo_gradient(topo_gra, region, "t", data=topo_data)
 
     # make cpt file
-    cptfile = "temp/temp.cpt"
+    cptfile = "temp/vs_temp.cpt"
+    cmap = "src/txt/cptfiles/seismic.cpt"
     if ave:
         pygmt.makecpt(
-            cmap="jet",
+            cmap="polar",
             series=[-15, 15, 0.1],
             output=cptfile,
             continuous=True,
             background=True,
+            reverse=True,
         )
     else:
         series = [2.5, 5.5, 0.1]
         pygmt.makecpt(
-            cmap="seis",
+            cmap=cmap,
             series=series,
             output=cptfile,
             continuous=True,
@@ -126,6 +129,7 @@ def plot_vs_hplane(grid, region, fname, *, ave):
 
 # gmt plot v plane
 def gmt_plot_vs_vplane(tomos, cpts, areas, borders, topo, gra, line, fn, ave):
+    ic("figing...")
     # gmt plot
     fig = pygmt.Figure()
     title = Path(fn).stem
@@ -145,7 +149,7 @@ def gmt_plot_vs_vplane(tomos, cpts, areas, borders, topo, gra, line, fn, ave):
         fig.colorbar(
             cmap=cpts["ave"],
             position="JBC+w3i/0.10i+o0c/-0.5i+h",
-            frame="xa2f2",
+            frame="xa5f5",
         )
     else:
         tms = [tomos[i] for i in ["lithos", "crust"]]
@@ -193,9 +197,7 @@ def gmt_plot_vs_hplane(grd, cpt, region, gra, fname):
         delim_whitespace=True,
     )
     fig = fig_htomo(fig, grd, region, title, cpt, gra, sta=sta)
-    fig.colorbar(
-        cmap=cpt, position="jBC+w5c/0.3c+o0i/-1c+h+m", frame="x5f5"
-    )
+    fig.colorbar(cmap=cpt, position="jBC+w5c/0.3c+o0i/-1c+h+m", frame="x5f5")
     # plot colorbar
     # fig.colorbar(
     #     cmap=cpt, position="jMR+v+w10c/0.3c+o-1.5c/0c+m", frame="xa0.2f0.2"
