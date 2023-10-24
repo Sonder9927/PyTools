@@ -38,14 +38,20 @@ def ppt_add_probs(prs, figs, margin, shape):
     return slide_add_batch_with_title(prs, prob_figs, config_param)
 
 
-def ppt_add_one_fig_per_slide(prs, figs, margin, idt):
+def ppt_add_one_fig_per_slide(prs, figs, margin, shape, idt):
     [left, top] = margin
+    [width, height] = shape
     blank_slide_layout = prs.slide_layouts[6]
-
     for f in figs.glob(idt):
         # insert one fig into new slide
         slide = prs.slides.add_slide(blank_slide_layout)
-        slide.shapes.add_picture(str(f), util.Cm(left), util.Cm(top))
+        slide.shapes.add_picture(
+            str(f),
+            util.Cm(left),
+            util.Cm(top),
+            util.Cm(width),
+            util.Cm(height),
+        )
 
     return prs
 
@@ -91,13 +97,13 @@ def ppt_add_diffs(prs, figs: Path, info_file, margin):
     return prs
 
 
-def ppt_add_single_type(prs, figs, margin, shape, idt, key):
+def ppt_add_single_type(prs, figs, idt, margin, shape, key=None, rcn=[2, 3]):
     """
     This script can insert r*c pictures
     into a new slide of pptx.
     """
     config_param = {
-        "rc_n": [2, 3],
+        "rc_n": rcn,
         "rc_i": [0.382, 1],
         "margin": margin,
         "shape": shape,
