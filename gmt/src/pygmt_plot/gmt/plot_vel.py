@@ -104,21 +104,23 @@ def gmt_plot_as(topos, vel, std, fn, sta=None):
         scale = "M?"
         with fig.set_panel(panel=0):
             fig = fig_htopo(fig, topos, sta=sta, scale=scale)
-            pygmt.makecpt(cmap="src/txt/cptfiles/Vc_1.8s.cpt", series=[-9, 9])
+            pygmt.makecpt(
+                cmap="src/txt/cptfiles/Vc_1.8s.cpt", series=[-4.1, 4.1]
+            )
             fig.grdimage(
                 grid=vel, projection="M?", region=topos["region"], frame="a"
             )
-            fig = fig_tect_and_sta(fig, None)
+            fig = fig_tect_and_sta(fig, 0, None)
             fig.colorbar(
-                frame=["a3f3", 'x+l"TPWT Phase velocity anomaly"', "y+l%"]
+                frame=["a2f2", 'x+l"TPWT Phase velocity anomaly"', "y+l%"]
             )
         with fig.set_panel(panel=1):
             fig = fig_htopo(fig, topos, sta=sta, scale=scale)
-            pygmt.makecpt(cmap="hot", series=[0, 70], reverse=True)
+            pygmt.makecpt(cmap="hot", series=[0, 81], reverse=True)
             fig.grdimage(
                 grid=std, projection="M?", region=topos["region"], frame="a"
             )
-            fig = fig_tect_and_sta(fig, sta)
+            fig = fig_tect_and_sta(fig, 0, sta)
             fig.colorbar(
                 frame=["a20f20", 'x+l"TPWT standard deviation"', "y+lm/s"]
             )
