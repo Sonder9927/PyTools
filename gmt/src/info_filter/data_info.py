@@ -1,15 +1,13 @@
+import json
 from pathlib import Path
+
 from icecream import ic
+import numpy as np
 import pandas as pd
 import pygmt
-import json
 
-from src.pygmt_plot.gmt import (
-    gmt_blockmean_surface_grdsample,
-)
-
-from .points import points_boundary, points_inner
 from .grid import GridPhv
+from .points import points_boundary, points_inner
 
 # from tpwt_r import Point
 
@@ -36,6 +34,8 @@ def vel_info_per(data_file: Path, points: list) -> dict:
 
 
 def standard_deviation_per(ant: Path, tpwt: Path, region, stas) -> float:
+    from src.pygmt_plot.gmt import gmt_blockmean_surface_grdsample
+
     temp = "temp/temp.grd"
     gmt_blockmean_surface_grdsample(ant, temp, temp, region)
     ant_xyz = pygmt.grd2xyz(temp)
@@ -113,3 +113,34 @@ def truncate_misfit(mmf, limit, savefile=None):
     if savefile is not None:
         result.to_csv(savefile, index=None)
     return result
+
+
+def calc_lab(vsf: Path, mmf, mlf):
+    vs = pd.read_csv(vsf)
+    mm = pd.read_csv(mmf)
+    data = vs.merge(mm[["x", "y", "moho"]], on=["x", "y"], how="left")
+    data["moho"] = -data["moho"]
+    df = data[(data["z"] < data["moho"] - 20) & (data["z"] > -240)]
+    dt = df.groupby(["x", "y"], group_keys=False).apply(_gradient)
+    result = (
+        dt.groupby(["x", "y"])
+        .apply(_target_gra)
+        .dropna()
+        .reset_index(drop=True)
+    )
+    result.rename(columns={"z": "lab"}, inplace=True)
+    result.to_csv(mlf, index=None)
+
+
+def _gradient(group):
+    group["gra"] = np.gradient(group["v"], group["z"])
+    return group
+
+
+def _target_gra(group):
+    max_idx = group["gra"].idxmin() if any(group["gra"] < 0) else None
+    return (
+        group.loc[max_idx, ["x", "y", "moho", "z"]]
+        if max_idx is not None
+        else None
+    )

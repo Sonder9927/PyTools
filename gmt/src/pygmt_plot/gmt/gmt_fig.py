@@ -1,10 +1,11 @@
 from .gmt_make_data import sta_clip
 
 
-def fig_vel(fig, topo_grd, vel_grd, region, title, cpts, gra, sta=None):
+def fig_vel(fig, topos, vels, title, sta=None):
     """
     plot vel map
     """
+    region = topos["region"]
     fig.basemap(
         projection=_hscale(region),
         region=region,
@@ -12,14 +13,20 @@ def fig_vel(fig, topo_grd, vel_grd, region, title, cpts, gra, sta=None):
     )
     # fig.coast(resolution="l", land="white", area_thresh=10_000)
     # grdimage
-    fig.grdimage(grid=topo_grd, cmap=cpts[0], shading=gra)
-    # cut vel_grd by the boundary of stations
+    fig.grdimage(
+        grid=topos["grd"], cmap=topos["cpt"], shading=topos["gra"]
+    )  # cut vel_grd by the boundary of stations
     if sta is None:
-        fig.grdimage(grid=vel_grd, cmap=cpts[1], shading=gra)
+        fig.grdimage(grid=vels["grd"], cmap=vels["cpt"], shading=topos["gra"])
     else:
-        grd = sta_clip(vel_grd, region, sta)
-        fig.grdimage(grid=grd, cmap=cpts[1], shading=gra, nan_transparent=True)
-    return fig_lines_and_sta(fig, sta)
+        grd = sta_clip(vels["grd"], region, sta)
+        fig.grdimage(
+            grid=grd,
+            cmap=vels["cpt"],
+            shading=topos["gra"],
+            nan_transparent=True,
+        )
+    return fig_tect_and_sta(fig, 0, sta)
 
 
 def fig_vtomo(fig, tomos: list, cpts: list, region, borders: dict):
@@ -48,15 +55,27 @@ def fig_vtopo(fig, topo, region, title):
     return fig
 
 
-def fig_htopo(fig, grd, cmap, region, gra, line):
+def fig_htopo(
+    fig,
+    topos,
+    lines=None,
+    line_pen="thick,black",
+    scale=None,
+    tect=0,
+    sta=None,
+):
+    region = topos["region"]
     fig.basemap(
-        projection=_hscale(region),
+        # projection=_hscale(region),
+        projection=scale or _hscale(region),
         region=region,
         frame=["WSne", "xa4f2", "ya4f2"],
     )
-    fig.grdimage(grid=grd, cmap=cmap, shading=gra)
-    fig = fig_lines_and_sta(fig)
-    fig.plot(data=line, pen="fat,red")
+    fig.grdimage(grid=topos["grd"], cmap=topos["cpt"], shading=topos["gra"])
+    if lines:
+        for line in lines:
+            fig.plot(data=line, pen=line_pen)
+    fig = fig_tect_and_sta(fig, tect, sta)
     return fig
 
 
@@ -72,7 +91,7 @@ def fig_htomo(fig, grid, region, title, cpt, topo_gra, sta=None):
     fig.coast(resolution="l", land="white", area_thresh=10_000)
     # grdimage
     fig.grdimage(grid=grid, cmap=cpt, shading=topo_gra, nan_transparent=True)
-    return fig_lines_and_sta(fig, sta)
+    return fig_tect_and_sta(fig, 0, sta)
 
 
 def fig_diff(fig, diff, region, title, cpt, topo_gra, sta):
@@ -89,7 +108,7 @@ def fig_diff(fig, diff, region, title, cpt, topo_gra, sta):
     diff = sta_clip(diff, region, sta)
     fig.grdimage(grid=diff, cmap=cpt, shading=topo_gra, nan_transparent=True)
 
-    fig = fig_lines_and_sta(fig, sta)
+    fig = fig_tect_and_sta(fig, 0, sta)
 
     # colorbar
     fig.colorbar(
@@ -99,15 +118,14 @@ def fig_diff(fig, diff, region, title, cpt, topo_gra, sta):
     return fig
 
 
-def fig_lines_and_sta(fig, sta=None):
+def fig_tect_and_sta(fig, tect, sta):
     # stations and China_tectonic
     # lines
+    geo_data = ["China_tectonic.dat", "CN-faults.gmt"]
     fig.coast(shorelines="1/0.5p,black")
-    # fig.plot(data="ncc_lv.xy", pen="0.8p,black")
-    fig.plot(data="src/txt/China_tectonic.dat", pen="thick,black,-")
-    if sta is None:
-        return fig
-    fig.plot(data=sta, style="t0.1c", fill="blue", pen="black")
+    fig.plot(data=f"src/txt/tects/{geo_data[tect]}", pen="thick,black,-")
+    if sta is not None:
+        fig.plot(data=sta, style="t0.1c", fill="blue", pen="black")
     return fig
 
 

@@ -46,7 +46,9 @@ def plot_dispersion_curve(vs, periods, fsp) -> None:
     )
     # plot dc
     fig.plot(data=np.array(dcs["dc"]), pen="0.8p,red")
-    fig.plot(data=np.array(dcs["ant"]), pen="0.3p", style="t0.15c", fill="gold")
+    fig.plot(
+        data=np.array(dcs["ant"]), pen="0.3p", style="t0.15c", fill="gold"
+    )
     fig.plot(
         data=np.array(dcs["tpwt"]), pen="0.3p", style="i0.15c", fill="green"
     )

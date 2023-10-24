@@ -16,15 +16,16 @@ class PptMaker:
         self.ppt_name = pn
         self.figs = fig_root
         self.margin = [0.789, 0.567]
-        self.shape = {"h1": [7, 8.5], "dc": [6.8, 3.2], "prob": [7, 9]}
+        self.shape = {"h1": [7, 8.5], "dc": [6.8, 3.2], "prob": [7.2, 8.5]}
         # create a new instance for pptx
         self.prs = self._ppt(remake)
 
     def add_mc_results(self, mc_dir):
         mc = self.figs / mc_dir
+        rc1 = {"rc_n": [2, 3], "rc_i": [0.382, 1]}
         # misfit
         self.prs = ppt_add_one_fig_per_slide(
-            self.prs, mc, self.margin, "misfit"
+            self.prs, mc, [3.456, 2.345], "misfit.png"
         )
         # probalCrs
         self.prs = ppt_add_probs(
@@ -34,6 +35,7 @@ class PptMaker:
         self.prs = ppt_add_single_type(
             self.prs,
             mc / "depth",
+            rc1,
             self.margin,
             self.shape["h1"],
             "vs*",
@@ -41,7 +43,7 @@ class PptMaker:
         )
         # vs profile
         self.prs = ppt_add_one_fig_per_slide(
-            self.prs, mc / "grid", self.margin, "vs*"
+            self.prs, mc / "profile", self.margin, "vs*"
         )
 
     def add_dispersion_curves(self, dcs_dir):
@@ -64,13 +66,31 @@ class PptMaker:
         tpwt = self.figs / tpwt_dir
         # add phase vel of all periods
         key = lambda p: int(p.stem.split("_")[-1])
+        rc1 = {"rc_n": [2, 3], "rc_i": [0.382, 1]}
         self.prs = ppt_add_single_type(
-            self.prs, tpwt / "phv", self.margin, self.shape["h1"], "*Vel*", key
+            self.prs,
+            tpwt / "phv",
+            rc1,
+            self.margin,
+            self.shape["h1"],
+            "*VEL*",
+            key,
+        )
+        rc2 = {"rc_n": [3, 2], "rc_i": [0.32, 1]}
+        self.prs = ppt_add_single_type(
+            self.prs,
+            tpwt / "as",
+            rc2,
+            self.margin,
+            [15, 8],
+            "*AS*",
+            key,
         )
         # add check board of all periods
         self.prs = ppt_add_single_type(
             self.prs,
             tpwt / "checkboard",
+            rc1,
             self.margin,
             self.shape["h1"],
             "*CB*",

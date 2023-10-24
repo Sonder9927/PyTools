@@ -1,16 +1,15 @@
-from icecream import ic
 from pathlib import Path
 
+from icecream import ic
+
+from src.info_filter import calc_lab, truncate_misfit, vel_info
 from src.pygmt_plot import (
     gmt_plot_all_periods,
+    gmt_plot_area,
     gmt_plot_dispersion_curves,
     gmt_plot_misfit,
     gmt_plot_vs,
-    # gmt_plot_vs_abso,
-    # gmt_plot_vs_boundary,
-    # gmt_plot_vs_compare,
 )
-from src.info_filter import vel_info, truncate_misfit
 from src.tpwt_show import PptMaker
 
 
@@ -19,7 +18,7 @@ def make_ppt(ppt_name, figs: Path, diff_info):
     ppt.add_mc_results(r"mc_figs")
     ppt.add_dispersion_curves(r"dispersion_curves")
     ppt.add_diffs(r"diff_figs", info_file=diff_info)
-    ppt.add_tpwt_results(r"twpt_figs")
+    ppt.add_tpwt_results(r"tpwt_figs")
     ppt.save()
     ic()
 
@@ -33,7 +32,13 @@ def main():
        from all grids by `collect_grids`)
     5. make ppt to show results
     """
-    fig_dirs = ["tpwt_figs", "mc_figs", "dispersion_curves", "diff_figs"]
+    fig_dirs = [
+        "tpwt_figs",
+        "mc_figs",
+        "dispersion_curves",
+        "diff_figs",
+        "area_figs",
+    ]
     fp = Path("images")
     for fd in fig_dirs:
         fpd = fp / fd
@@ -41,16 +46,28 @@ def main():
             fpd.mkdir()
 
     txt = Path(r"src/txt")
+    region = [115, 122.5, 27.9, 34.3]
 
-    # # phase result
-    # gmt_plot_all_periods(r"src/txt/periods_series.json")
+    # phase result
+    # gmt_plot_all_periods(
+    #     txt/"periods_series.json",
+    #     tpwt=not True,
+    #     checkboard=not True,
+    #     std=True,
+    #     diff=not True,
+    # )
     # vel_info(r"vel_info.json")
     # gmt_plot_dispersion_curves(r"src/txt/station.lst")
 
     # mc result
-    gmt_plot_misfit(txt / "misfit_moho.csv")
-    # data = truncate_misfit(txt / "misfit_moho.csv", 0.5)
-    # gmt_plot_vs(txt / "vs.csv", txt / "misfit_moho.csv")
+    mmf = txt / "misfit_moho.csv"
+    # data = truncate_misfit(mmf, 0.5)
+    # gmt_plot_misfit(mmf, region)
+    # gmt_plot_area(region, txt / "per_evt_sta.csv")
+    mlf = txt / "moho_lab.csv"
+    vsf = txt / "vs.csv"
+    # calc_lab(vsf, mmf, mlf)
+    gmt_plot_vs(vsf, mlf)
 
     # make_ppt(
     #   ppt_name=r"target/tpwt.pptx", figs=Path(r"images"), diff_info=info_file

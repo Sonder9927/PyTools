@@ -9,45 +9,39 @@ from src import info_filter
 # from .gmt_make_data import gmt_blockmean_surface_grdsample
 
 
-def vplane_makecpt(cmoho: str, clab, ctopo, cVave):
-    cmap = "src/txt/cptfiles/seismic.cpt"
+def vplane_makecpt(cmoho: str, clab, cVave):
     cmap = "polar"
+    cmap = "src/txt/cptfiles/Vc_1.8s.cpt"
     # crust
     pygmt.makecpt(
         cmap=cmap,
-        series=[3.2, 4.1, 0.01],
+        series=[3, 4, 0.1],
         # truncate=[0.05, 0.85],
         output=cmoho,
         continuous=True,
         background=True,
-        reverse=True,
+        # reverse=True,
     )
     # lithos
     pygmt.makecpt(
         cmap=cmap,
-        series=[4, 4.9, 0.01],
+        series=[4.2, 4.8, 0.01],
         # truncate=[0.05, 0.85],
         output=clab,
         continuous=True,
         background=True,
-        reverse=True,
+        # reverse=True,
     )
     # ave
     pygmt.makecpt(
-        cmap="polar",
-        series=[-15, 15, 0.1],
+        # cmap="polar",
+        cmap=cmap,
+        series=[-5, 5, 0.1],
         output=cVave,
         continuous=True,
         background=True,
-        reverse=True,
+        # reverse=True,
     )
-    if not Path(ctopo).exists():
-        pygmt.makecpt(
-            cmap="grayC",
-            series=[-100, 2000, 200],
-            continuous=True,
-            output=ctopo,
-        )
 
 
 def vplane_clip_data(grid, boundary, region):

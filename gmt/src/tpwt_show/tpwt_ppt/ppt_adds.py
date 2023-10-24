@@ -3,6 +3,36 @@ from pathlib import Path
 import json
 
 
+def ppt_add_single_type(prs, figs, rc, margin, shape, idt, key):
+    """
+    This script can insert r*c pictures
+    into a new slide of pptx.
+    """
+    config_param = {
+        "rc_n": rc["n"],
+        "rc_i": rc["i"],
+        "margin": margin,
+        "shape": shape,
+        "title": f"{idt.replace(r'*','')} Results",
+    }
+    # make batch figs for every slide
+    pictures = sorted(figs.rglob(idt), key=key)
+    return slide_add_batch_with_title(prs, pictures, config_param)
+
+
+def ppt_add_stds(prs, figs, margin, shape):
+    config_param = {
+        "rc_n": [3, 2],
+        "rc_i": [0.32, 1],
+        "margin": margin,
+        "shape": shape,
+        "title": "Dispersion Curves",
+    }
+    # make batch figs for every slide
+    dc_figs = sorted(figs.rglob("*.png"))
+    return slide_add_batch_with_title(prs, dc_figs, config_param)
+
+
 def ppt_add_dcs(prs, figs, margin, shape):
     """
     This script can insert r*c pictures of dispersion curve
@@ -34,7 +64,7 @@ def ppt_add_probs(prs, figs, margin, shape):
         "title": "probalCrs by mcmc",
     }
     # make batch figs for every slide
-    prob_figs = sorted(figs.rglob("*/*prob*"))
+    prob_figs = sorted(figs.rglob("*prob*"))
     return slide_add_batch_with_title(prs, prob_figs, config_param)
 
 
@@ -91,23 +121,6 @@ def ppt_add_diffs(prs, figs: Path, info_file, margin):
     return prs
 
 
-def ppt_add_single_type(prs, figs, margin, shape, idt, key):
-    """
-    This script can insert r*c pictures
-    into a new slide of pptx.
-    """
-    config_param = {
-        "rc_n": [2, 3],
-        "rc_i": [0.382, 1],
-        "margin": margin,
-        "shape": shape,
-        "title": f"{idt.replace(r'*','')} Results",
-    }
-    # make batch figs for every slide
-    pictures = sorted(figs.glob(idt), key=key)
-    return slide_add_batch_with_title(prs, pictures, config_param)
-
-
 def slide_add_batch_with_title(prs, figs, config):
     nrow, ncol = config["rc_n"]  # shape
     irow, icol = config["rc_i"]  # itvel
@@ -120,7 +133,7 @@ def slide_add_batch_with_title(prs, figs, config):
     title.text = config["title"]
 
     batch = nrow * ncol
-    figs_batch = [figs[i: i + batch] for i in range(0, len(figs), batch)]
+    figs_batch = [figs[i : i + batch] for i in range(0, len(figs), batch)]
     blank_slide_layout = prs.slide_layouts[6]
     for fb in figs_batch:
         # new slide

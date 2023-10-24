@@ -2,7 +2,7 @@
 # Version: 0.1.2
 # Description: plot diff between tpwt and ant results.
 
-from .gmt_make_data import topo_gradient, diff_make
+from .gmt_make_data import make_topos, diff_make
 from .gmt_fig import fig_htomo, fig_diff
 
 import pandas as pd
@@ -42,7 +42,7 @@ def gmt_plot_diff(region, cpt, tpwt_grd, ant_grd, diff_grd, topo_gra, fname):
 
     # plot diff
     fig.shift_origin(xshift="-6c", yshift="-7c")
-    cpt_diff = "src/txt/vs_dif.cpt"
+    cpt_diff = "src/txt/cptfiles/vs_dif.cpt"
     diff_title = Path(fname).stem
     fig = fig_diff(fig, diff_grd, region, diff_title, cpt_diff, topo_gra, sta)
 
@@ -62,11 +62,9 @@ def plot_diff(grid_tpwt, grid_ant, region, fig_name):
         grid_ant, grid_tpwt, region, cptfile, ant_grd, tpwt_grd, diff_grd
     )
     # topo file
-    topo = "ETOPO1"
-    topo_data = f"src/txt/{topo}.grd"
-    topo_gra = f"temp/topo_{topo}.gradient"
-    topo_gradient(topo_gra, region, "t", data=topo_data)
+    topos = make_topos("ETOPO1", region)
+    # topo_gradient(topo_gra, region, "t", data=topo_data)
 
     gmt_plot_diff(
-        region, cptfile, tpwt_grd, ant_grd, diff_grd, topo_gra, fig_name
+        region, cptfile, tpwt_grd, ant_grd, diff_grd, topos["gra"], fig_name
     )
