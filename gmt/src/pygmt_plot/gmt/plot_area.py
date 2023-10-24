@@ -36,7 +36,6 @@ def _gmt_fig_area(vici, area, fn, sta=None):
         FONT_TITLE="18",
         FONT="10",
     )
-    sta = None
     with fig.subplot(
         nrows=1, ncols=2, figsize=("15c", "8c"), autolabel=True, margins="0.5c"
     ):
@@ -50,7 +49,7 @@ def _gmt_fig_area(vici, area, fn, sta=None):
             )
             fig = fig_tect_and_sta(fig, 0, sta)
             fig.text(
-                textfiles="src/txt/tects/ViciTectName.txt",
+                textfiles="src/txt/tects/viciTectName.txt",
                 angle=True,
                 font=True,
                 justify=True,
@@ -60,7 +59,7 @@ def _gmt_fig_area(vici, area, fn, sta=None):
         with fig.set_panel(panel=1):
             fig = fig_htopo(fig, area, scale="M?", tect=1, sta=sta)
             fig.text(
-                textfiles="src/txt/tects/AreaTectName.txt",
+                textfiles="src/txt/tects/areaTectName.txt",
                 angle=True,
                 font=True,
                 justify=True,
