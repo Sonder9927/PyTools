@@ -1,12 +1,12 @@
 from pathlib import Path
 
 import pandas as pd
-from src import info_filter
 
 from .gmt import plot_dispersion_curve
 
 
 def gmt_plot_dispersion_curves(sta_file: str):
+    from src import info_filter
     """
     plot dispersion curves of tpwt and ant
     """

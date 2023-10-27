@@ -7,7 +7,7 @@ import pandas as pd
 import pygmt
 
 from .grid import GridPhv
-from .points import points_boundary, points_inner
+from .points import points_boundary, points_inner, hull_points
 
 # from tpwt_r import Point
 
@@ -68,12 +68,13 @@ def vel_info(target: str, periods=None):
     stas = pd.read_csv(
         sta_file, delim_whitespace=True, usecols=[1, 2], names=["x", "y"]
     )
+    hull_points(stas)
     boundary = points_boundary(stas[["x", "y"]])  # default is clock
     # po = clock_sorted(boundary_points)  # no need
 
     gd = Path("grids")
     if periods is None:
-        pg = gd.glob("*t_grids/*")
+        pg = gd.glob("*t_grids/*.grid")
         periods = sorted(list({int(i.stem.split("_")[-1]) for i in pg}))
 
     gps = [GridPhv(per) for per in periods]

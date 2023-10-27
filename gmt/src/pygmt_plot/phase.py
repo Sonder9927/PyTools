@@ -5,7 +5,7 @@ from src.info_filter import GridPhv
 from .gmt import plot_as, plot_diff, plot_vel
 
 
-def gmt_plot_all_periods(ps_file, dcheck=2, **targets) -> None:
+def gmt_plot_all_periods(ps_file, dcheck=2.0, **targets) -> None:
     """
     plot [diff vel as cb] of tpwt
     [as] not ready
@@ -24,7 +24,8 @@ def gmt_plot_all_periods(ps_file, dcheck=2, **targets) -> None:
         tpwt = gp.grid_file("tpwt", "vel")
         # plot tpwt phv
         if targets.get("tpwt"):
-            plot_vel(tpwt, gp.region, gp.fig_tpwt_name("Vel"), gp.series)
+            cptconfig = {"series": gp.series}
+            plot_vel(tpwt, gp.region, gp.fig_tpwt_name("Vel"), cptconfig)
         # plot checkboard
         if tpwt_cb := _check_target("checkboard", gp, ["tpwt", "cb", dcheck]):
             plot_vel(tpwt_cb, gp.region, gp.fig_tpwt_name("CB"))

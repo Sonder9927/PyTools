@@ -6,6 +6,27 @@ import numpy as np
 import pandas as pd
 from scipy.spatial import ConvexHull
 from tpwt_r import Point  # pyright: ignore
+import xarray as xr
+
+
+def hull_points(data: pd.DataFrame) -> None:
+    ff = "src/txt/sta_hull.nc"
+    points = data[["x", "y"]].values
+    hull = ConvexHull(points)
+    hull_points = points[hull.vertices]
+    df = pd.DataFrame(hull_points, columns=["x", "y"])
+    # df.to_csv(pf, sep="\t", index=False, header=False)
+    ds = xr.Dataset(
+        {"x_values": ("points", df["x"]), "y_values": ("points", df["y"])},
+        coords={
+            "x_coords": ("points", df["x"]),
+            "y_coords": ("points", df["y"]),
+        },
+    )
+    ds.to_netcdf(ff)
+
+
+###############################################################################
 
 
 def times_of_crossing_boundary(point: Point, points: list[Point]) -> int:
@@ -17,9 +38,6 @@ def times_of_crossing_boundary(point: Point, points: list[Point]) -> int:
             times += 1
 
     return times
-
-
-###############################################################################
 
 
 def clock_sorted(points):

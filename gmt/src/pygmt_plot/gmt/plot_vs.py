@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 import pygmt
 
-from .gmt_fig import fig_htomo, fig_htopo, fig_vtomo, fig_vtopo
-from .gmt_make_data import tomo_grid_data, make_topos
+from .gmt_fig import fig_tomos
+from .gmt_make_data import make_topos, tomo_grid_data
 from .plane import vplane_clip_data, vplane_makecpt
 
 
@@ -18,67 +18,40 @@ def plot_vs_vplane(
     gmt plot vplane of vs contain abso and ave.
     The abscissa is determined by `idt` which should be x or y.
     """
-    ic(line, idt)
-    if idt == "x":
-        idtn = 0
-    elif idt == "y":
-        idtn = 1
-    else:
-        raise KeyError("Please select `x` or `y` for abscissa of vplane")
-    # vregion = [hregion[idtn * 2], hregion[idtn * 2 + 1], -250, 0]
-    lregion = sorted([r[idtn] for r in line]) + [dep, 0]
-    temp = Path("temp")
-    # moho
-    promoho = moho[[idt, "z"]]
-    promoho.columns = ["x", "y"]
-    if lab is not None:
-        prolab = lab[[idt, "z"]]
-        prolab.columns = ["x", "y"]
-    # protopo
+    lregion = _profile_range(idt, line, dep)
+    # topo and borders
     topo = "ETOPO1"
     topo_data = f"src/txt/{topo}.grd"
-    topos = make_topos(topo, hregion)
-    protopo: pd.DataFrame = pygmt.grdtrack(
-        points=path,
-        grid=topo_data,
-        newcolname="newz",
-        verbose="w",
-        coltypes="g",
-    )  # pyright: ignore
-    protopo.columns = ["x", "y", "n", "z"]
-    topos["pro"] = protopo[[idt, "z"]]
+    topo = make_topos(topo, hregion)
+    borders = _profile_borders(path, topo_data, moho, lab, idt)
 
     # make cpt files
-    cptfiles = [str(temp / c) for c in ["crust.cpt", "lithos.cpt", "Vave.cpt"]]
-    vplane_makecpt(*cptfiles)
-    targets = ["crust", "lithos", "ave"]
-    cpts = dict(zip(targets, cptfiles))
+    cpts = [f"temp/{c}" for c in ["crust.cpt", "lithos.cpt", "Vave.cpt"]]
+    vplane_makecpt(*cpts)
 
     # vs grid
     grid = vs[[idt, "z", "v"]]
     grid.columns = ["x", "y", "z"]
-    vs_grd = temp / "vs.grd"
+    vs_grd = "temp/vs.grd"
     tomo_grid_data(grid, vs_grd, lregion, blockmean=[0.5, 1])
-    tomos = {"region": lregion, "lithos": vs_grd}
+    tomos = [{"grid": vs_grd, "cmap": cpts[-1]}]
     suffix = "_ave"
+    title = f"ave Sv({idt})"
     if not ave:
         ic("Clipping moho from vs.grd...")
         # cut tomo_moho from vs_grd
-        tomos["crust"] = vplane_clip_data(vs_grd, promoho, lregion)
-        ic("Maked crust data!")
+        data = vplane_clip_data(vs_grd, borders[1], lregion)
+        # notice the order of grdimage: 1-lithos, 2-crust
+        tomos = [
+            {"grid": vs_grd, "cmap": cpts[1]},
+            {"grid": data, "cmap": cpts[0]},
+        ]
+        ic("Distincted crust data!")
         suffix = "_vel"
+        title = f"Sv({idt})"
 
     fname = f"{fname}_{idt}{suffix}.png"
-    gmt_plot_vs_vplane(
-        topos,
-        tomos,
-        cpts,
-        borders={"moho": promoho},
-        # borders={"moho": promoho, "lab": prolab},
-        line=line,
-        fn=fname,
-        ave=ave,
-    )
+    gmt_plot_vs_vplane(topo, tomos, lregion, borders, line, title, fname, ave)
 
 
 def plot_vs_hplane(grid, region, fname, *, ave):
@@ -86,7 +59,7 @@ def plot_vs_hplane(grid, region, fname, *, ave):
     gmt plot hplane of vs
     """
     # topo file
-    topos = make_topos("ETOPO1", region)
+    topo = make_topos("ETOPO1", region)
 
     # make cpt file
     cptfile = "temp/temp.cpt"
@@ -113,17 +86,17 @@ def plot_vs_hplane(grid, region, fname, *, ave):
     # make tomo grid data
     tomo_grd = "temp/tomo.grd"
     tomo_grid_data(grid, tomo_grd, region)
+    tomo = {"grid": tomo_grd, "cmap": cptfile}
 
     # gmt plot hplane
-    gmt_plot_vs_hplane(tomo_grd, cptfile, region, topos["gra"], fname)
+    gmt_plot_vs_hplane(topo, tomo, fname)
 
 
 # gmt plot v plane
-def gmt_plot_vs_vplane(topos, tomos, cpts, borders, line, fn, ave):
+def gmt_plot_vs_vplane(topo, tomos, lregion, borders, line, title, fn, ave):
     ic("figing...")
     # gmt plot
     fig = pygmt.Figure()
-    title = Path(fn).stem
     # define figure configuration
     pygmt.config(
         MAP_FRAME_TYPE="plain",
@@ -131,43 +104,56 @@ def gmt_plot_vs_vplane(topos, tomos, cpts, borders, line, fn, ave):
         MAP_DEGREE_SYMBOL="none",
         FONT_TITLE="18",
     )
-    fig = fig_vtopo(fig, topos["pro"], tomos["region"][:2] + [0, 2000], title)
+    ltopo = {"region": lregion[:2] + [0, 1200]}
+    kwgs = {"projection": "X6i/0.5i", "lines": [borders[0]], "line_pen": "4"}
+    fig = fig_tomos(fig, ltopo, [], [f"sW+t{title}", "ya400"], **kwgs)
+    # fig = fig_vtopo(fig, borders[0], lregion[:2] + [0, 2000], title)
     fig.shift_origin(yshift="-5.5")
+    ltopo["region"] = lregion
+    kwgs = {
+        "projection": "X6i/2i",
+        "lines": [borders[1]],
+        "line_pen": "1p,black,-",
+    }
+    fig = fig_tomos(fig, ltopo, tomos, **kwgs)
+    fig.shift_origin(yshift="-2")
     if ave:
-        tms = [tomos["lithos"]]
-        fig = fig_vtomo(fig, tms, [cpts["ave"]], tomos["region"], borders)
-        fig.shift_origin(yshift="-2")
         fig.colorbar(
-            cmap=cpts["ave"],
+            cmap=tomos[0]["cmap"],
             position="JBC+w3i/0.10i+o0c/-0.5i+h",
             frame="xa2f2",
         )
     else:
-        tms = [tomos[i] for i in ["lithos", "crust"]]
-        cs = [cpts[i] for i in ["lithos", "crust"]]
-        fig = fig_vtomo(fig, tms, cs, tomos["region"], borders)
-        fig.shift_origin(yshift="-2")
+        # notice tomos is [lithos, crust]
         fig.colorbar(
-            cmap=cpts["crust"],
+            cmap=tomos[1]["cmap"],
             position="JBC+w3i/0.10i+o0c/-0.5i+h",
             frame="xa0.2f0.2",
         )
         fig.shift_origin(yshift="-1")
         fig.colorbar(
-            cmap=cpts["lithos"],
+            cmap=tomos[0]["cmap"],
             position="JBC+w3i/0.10i+o0c/-0.5i+h",
             frame="xa0.2f0.2",
         )
     fig.shift_origin(yshift="-4.5", xshift="3")
-    fig = fig_htopo(fig, topos, [line], "fat,red")
+    # fig = fig_htopo(fig, topo, [line], "fat,red", tect=1)
+    fig = fig_tomos(fig, topo, [], lines=[line], line_pen="fat,red", tect=0)
 
     fig.savefig(fn)
 
 
-def gmt_plot_vs_hplane(grd, cpt, region, gra, fname):
-    fig = pygmt.Figure()
-
+# def gmt_plot_vs_hplane(grd, cpt, region, gra, fname):
+def gmt_plot_vs_hplane(topo, tomo, fname):
+    sta = pd.read_csv(
+        "src/txt/station.lst",
+        usecols=[1, 2],
+        names=["x", "y"],
+        header=None,
+        delim_whitespace=True,
+    )
     # define figure configuration
+    fig = pygmt.Figure()
     pygmt.config(
         MAP_FRAME_TYPE="plain",
         # MAP_TITLE_OFFSET="0.25p",
@@ -178,18 +164,19 @@ def gmt_plot_vs_hplane(grd, cpt, region, gra, fname):
         # FONT="10",
     )
 
-    # plot vel fig
-    title = Path(fname).stem
-    sta = pd.read_csv(
-        "src/txt/station.lst",
-        usecols=[1, 2],
-        index_col=None,
-        header=None,
-        delim_whitespace=True,
+    text = Path(fname).stem.split("_")[-1]
+    fig = fig_tomos(fig, topo, [tomo], tect=0, sta=sta, clip=True)
+    fig.text(
+        x=topo["region"][0],
+        y=topo["region"][-1],
+        fill="white",
+        justify="LT",
+        font="9p",
+        text=text,
+        offset="j0.1",
     )
-    fig = fig_htomo(fig, grd, region, title, cpt, gra, sta=sta)
     # fig.colorbar(cmap=cpt, position="jBC+w5c/0.3c+o0i/-1c+h+m", frame="a2f4")
-    fig.colorbar(cmap=cpt, frame=["a2f2", "y+l%"])
+    fig.colorbar(cmap=tomo["cmap"], frame=["a", "y+l%"])
     # plot colorbar
     # fig.colorbar(
     #     cmap=cpt, position="jMR+v+w10c/0.3c+o-1.5c/0c+m", frame="xa0.2f0.2"
@@ -202,6 +189,40 @@ def gmt_plot_vs_hplane(grd, cpt, region, gra, fname):
     # )
 
     fig.savefig(fname)
+
+
+def _profile_range(idt, line, dep) -> list[float]:
+    ic(line, idt)
+    if idt == "x":
+        idtn = 0
+    elif idt == "y":
+        idtn = 1
+    else:
+        raise KeyError("Please select `x` or `y` for abscissa of vplane")
+    return sorted([line[0][idtn], line[1][idtn]]) + [dep, 0]
+
+
+def _profile_borders(path, topo_data, moho, lab, idt):
+    protopo: pd.DataFrame = pygmt.grdtrack(
+        points=path,
+        grid=topo_data,
+        newcolname="newz",
+        verbose="w",
+        coltypes="g",
+    )  # pyright: ignore
+    protopo.columns = ["x", "y", "n", "z"]
+    protopo = protopo[[idt, "z"]]
+    # moho
+    promoho = moho[[idt, "z"]]
+    promoho.columns = ["x", "y"]
+
+    borders = [protopo, promoho]
+
+    if lab is not None:
+        prolab = lab[[idt, "z"]]
+        prolab.columns = ["x", "y"]
+        borders.append(prolab)
+    return borders
 
 
 def lab_by_vel_gra(grd):

@@ -3,17 +3,24 @@
 # Description: plot diff between tpwt and ant results.
 
 from .gmt_make_data import make_topos, diff_make
-from .gmt_fig import fig_htomo, fig_diff
+from .gmt_fig import fig_tomos
 
 import pandas as pd
 from pathlib import Path
 import pygmt
 
 
-def gmt_plot_diff(region, cpt, tpwt_grd, ant_grd, diff_grd, topo_gra, fname):
-    fig = pygmt.Figure()
-
+def gmt_plot_diff(grds, region, cpt, fname):
+    sta = pd.read_csv(
+        "src/txt/station.lst",
+        usecols=[1, 2],
+        names=["x", "y"],
+        header=None,
+        delim_whitespace=True,
+    )
+    topo = make_topos("ETOPO1", region)
     # gmt plot
+    fig = pygmt.Figure()
     # define figure configuration
     pygmt.config(
         MAP_FRAME_TYPE="plain",
@@ -22,49 +29,57 @@ def gmt_plot_diff(region, cpt, tpwt_grd, ant_grd, diff_grd, topo_gra, fname):
         FONT_TITLE="18",
     )
 
-    sta = pd.read_csv(
-        "src/txt/station.lst",
-        usecols=[1, 2],
-        index_col=None,
-        header=None,
-        delim_whitespace=True,
-    )
-    # plot tpwt fig
-    fig = fig_htomo(fig, tpwt_grd, region, "tpwt", cpt, topo_gra, sta)
-    # shift plot origin of the second fig by 12 cm in x direction
-    fig.shift_origin(xshift="6c")
-    # plot ant fig
-    fig = fig_htomo(fig, ant_grd, region, "ant", cpt, topo_gra, sta)
-    # plot colorbar
-    fig.colorbar(
-        cmap=cpt, position="jBC+w5c/0.4c+o0c/-1.5c+m", frame="xa0.2f0.2"
-    )
-
-    # plot diff
-    fig.shift_origin(xshift="-6c", yshift="-7c")
-    cpt_diff = "src/txt/cptfiles/vs_dif.cpt"
-    diff_title = Path(fname).stem
-    fig = fig_diff(fig, diff_grd, region, diff_title, cpt_diff, topo_gra, sta)
-
+    with fig.subplot(
+        nrows=2,
+        ncols=2,
+        figsize=("15c", "15.5c"),
+        autolabel=True,
+        margins="0.5c",
+    ):
+        region = topo["region"]
+        kws = {"tect": 0, "sta": sta, "projection": "M?", "clip": True}
+        # ant
+        with fig.set_panel(panel=0):
+            # tomos = [{"grid": sta_clip(grds["ant"], region), "cmap": cpt}]
+            tomo = {"grid": grds["ant"], "cmap": cpt}
+            fig = fig_tomos(fig, topo, [tomo], **kws)
+        # tpwt
+        with fig.set_panel(panel=1):
+            # tomos = [{"grid": sta_clip(grds["tpwt"], region), "cmap": cpt}]
+            tomo["grid"] = grds["tpwt"]
+            fig = fig_tomos(fig, topo, [tomo], **kws)
+        # diff
+        with fig.set_panel(panel=2):
+            cdf = "src/txt/cptfiles/vs_dif.cpt"
+            tomo = {"grid": grds["diff"], "cmap": cdf}
+            kws["sta"] = None
+            fig = fig_tomos(fig, topo, [tomo], **kws)
+            fig.colorbar(
+                cmap=cdf,
+                position="jBC+w7c/0.4c+o0c/-1.5c+m",
+                frame="xa30f30",
+            )
+        # statistics
+        with fig.set_panel(panel=3):
+            per = Path(grds["tpwt"]).stem.split("_")[-1]
+            # use "X?" as projection
+    # vel colorbar
+    fig.shift_origin(yshift="9c")
+    fig.colorbar(cmap=cpt, position="jBC+w8c/0.4c+o0c/-1.5c+m", frame="xa")
     fig.savefig(fname)
 
 
 def plot_diff(grid_tpwt, grid_ant, region, fig_name):
     # cpt file
-    cptfile = "temp/diff_temp.cpt"
+    cpt = "temp/tomo.cpt"
     # grd file
-    ant_grd = "temp/vel_ant.grd"
-    tpwt_grd = "temp/vel_tpwt.grd"
-    # diff grid which can be used to calculate standard deviation
-    diff_grd = "temp/vel_diff.grd"
+    grds = {
+        "ant": "temp/vel_ant.grd",
+        "tpwt": "temp/vel_tpwt.grd",
+        "diff": "temp/vel_diff.grd",
+    }
 
-    diff_make(
-        grid_ant, grid_tpwt, region, cptfile, ant_grd, tpwt_grd, diff_grd
-    )
-    # topo file
-    topos = make_topos("ETOPO1", region)
+    diff_make(grid_ant, grid_tpwt, region, cpt, grds)
     # topo_gradient(topo_gra, region, "t", data=topo_data)
 
-    gmt_plot_diff(
-        region, cptfile, tpwt_grd, ant_grd, diff_grd, topos["gra"], fig_name
-    )
+    gmt_plot_diff(grds, region, cpt, fig_name)
