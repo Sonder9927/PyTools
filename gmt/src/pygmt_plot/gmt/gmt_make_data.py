@@ -28,6 +28,7 @@ def diff_make(ant, tpwt, region, cptfile, grds):
     merged["z"] = (merged["z_x"] - merged["z_y"]) * 1000
     diff = merged[["x", "y", "z"]]
     tomo_grid_data(diff, grds["diff"], region)
+    return diff
 
 
 def make_topos(
@@ -94,8 +95,8 @@ def make_topos(
 ###############################################################################
 
 
-def tomo_grid_data(data, outgrid, region, *, preffix="", **spacings) -> str:
-    bm_out = "temp/bm_temp"
+def tomo_grid_data(data, outgrid, region, *, bm=None, preffix="", **spacings):
+    bm_out = bm or "temp/bm.xyz"
     sf_grd = "temp/sf.grd"
     gmt_blockmean_surface_grdsample(
         data, bm_out, sf_grd, region, spacings=spacings, outgrid=outgrid
@@ -155,11 +156,18 @@ def get_info(grd_file: str, ndigits: int = 1) -> list[float]:
     return [min_vel, max_vel]
 
 
-def sta_clip(grd: str, region):
+def sta_clip(region, *, grid=None, data=None, output=None):
     hull = "src/txt/sta_hull.nc"
-    data = pygmt.grd2xyz(grd)
+    if grid is not None:
+        data = pygmt.grd2xyz(grid)
+    elif data is not None:
+        data = data
+    else:
+        raise KeyError("Input filename to `grid` or dataframe to `data`")
     clip_data = pygmt.select(data, F=hull)
-    return pygmt.xyz2grd(data=clip_data, region=region, spacing=0.01)
+    if output in ["grd", "grid"]:
+        return pygmt.xyz2grd(data=clip_data, region=region, spacing=0.01)
+    return clip_data
 
 
 # def sta_clip(grdfile: str, region, sta):

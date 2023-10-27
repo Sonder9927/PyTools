@@ -11,8 +11,7 @@ def gmt_plot_area(region, pesf):
     ip = Path("images/area_figs")
     if not ip.exists():
         ip.mkdir()
-    plot_area_map([vicinity, region], "aa.png")
-    # plot_area_map([vicinity, region], str(ip / "area.png"))
+    plot_area_map([vicinity, region], str(ip / "area.png"))
     return
     pes = pd.read_csv(pesf)
 

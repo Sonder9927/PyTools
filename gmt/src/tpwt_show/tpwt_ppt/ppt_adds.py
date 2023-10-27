@@ -97,11 +97,13 @@ def ppt_add_diffs(prs, figs: Path, info_file, margin):
     return prs
 
 
-def ppt_add_single_type(prs, figs, idt, margin, shape, key=None, rcn=[2, 3]):
+def ppt_add_single_type(prs, figs, idt, margin, shape, key=None, rcn=None):
     """
     This script can insert r*c pictures
     into a new slide of pptx.
     """
+    if rcn is None:
+        rcn = [2, 3]
     config_param = {
         "rc_n": rcn,
         "rc_i": [0.382, 1],

@@ -17,7 +17,7 @@ def make_ppt(ppt_name, figs: Path, diff_info):
     ppt = PptMaker(pn=ppt_name, fig_root=figs, remake=True)
     ppt.add_area(r"area_figs")
     ppt.add_tpwt_results(r"tpwt_figs")
-    ppt.add_diffs(r"diff_figs", info_file=diff_info)
+    ppt.add_diffs(r"diff_figs")
     ppt.add_dispersion_curves(r"dispersion_curves")
     ppt.add_mc_results(r"mc_figs")
     ppt.save()
@@ -54,13 +54,13 @@ def main():
     # vel_info(r"vel_info.json")
 
     # phase result
-    # gmt_plot_all_periods(
-    #     txt / "periods_series.json",
-    #     tpwt=not True,
-    #     checkboard=not True,
-    #     std=not True,
-    #     diff=True,
-    # )
+    gmt_plot_all_periods(
+        txt / "periods_series.json",
+        tpwt=True,
+        checkboard=not True,
+        std=not True,
+        diff=not True,
+    )
     # gmt_plot_dispersion_curves(r"src/txt/station.lst")
 
     # mc result
@@ -70,7 +70,7 @@ def main():
     mlf = txt / "moho_lab.csv"
     vsf = txt / "vs.csv"
     # calc_lab(vsf, mmf, mlf)
-    gmt_plot_vs(vsf, mlf)
+    # gmt_plot_vs(vsf, mlf)
 
     # make_ppt(
     #   ppt_name=r"target/tpwt.pptx", figs=Path(r"images"), diff_info=info_file

@@ -18,7 +18,7 @@ def gmt_plot_vs(vf, mlf, profile=False):
 
     # vplane
     params = {"hregion": r}
-    for linetype in ["xline", "yline", "raise", "decline"][-2:]:
+    for linetype in ["xline", "yline", "raise", "decline"]:
         for idt, ll in lines_generator(r, linetype):
             path, fn = gv.init_path(ll, linetype)
             params |= zip(

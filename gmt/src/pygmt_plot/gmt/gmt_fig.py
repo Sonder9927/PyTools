@@ -21,7 +21,9 @@ def fig_tomos(fig, topo, tomos, frame=None, **kwargs):
     # plot tomos
     if kwargs.get("clip"):
         for tomo in tomos:
-            tomo["grid"] = sta_clip(tomo["grid"], topo["region"])
+            tomo["grid"] = sta_clip(
+                topo["region"], grid=tomo["grid"], output="grd"
+            )
             fig.grdimage(**tomo, **tomo_param)
     else:
         for tomo in tomos:
