@@ -54,18 +54,19 @@ def main():
     # vel_info(r"vel_info.json")
 
     # phase result
-    gmt_plot_all_periods(
-        txt / "periods_series.json",
-        tpwt=True,
-        checkboard=not True,
-        std=not True,
-        diff=not True,
-    )
-    # gmt_plot_dispersion_curves(r"src/txt/station.lst")
+    # gmt_plot_all_periods(
+    #     txt / "periods_series.json",
+    #     tpwt=True,
+    #     checkboard=not True,
+    #     std=not True,
+    #     diff=not True,
+    # )
 
     # mc result
     mmf = txt / "misfit_moho.csv"
+    # dc with misfit
     # data = truncate_misfit(mmf, 0.5)
+    # gmt_plot_dispersion_curves(mmf)
     # gmt_plot_misfit(mmf, region)
     mlf = txt / "moho_lab.csv"
     vsf = txt / "vs.csv"

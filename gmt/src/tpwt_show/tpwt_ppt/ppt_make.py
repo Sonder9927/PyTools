@@ -5,6 +5,7 @@ from pptx import Presentation
 from .ppt_adds import (
     ppt_add_dcs,
     ppt_add_probs,
+    ppt_add_prob_with_dc,
     ppt_add_one_fig_per_slide,
     ppt_add_single_type,
 )
@@ -19,8 +20,8 @@ class PptMaker:
             "center": [15, 14.5],
             "sub1": [7, 8.5],
             "sub2": [11.3, 5.5],
-            "dc": [6.8, 3.2],
-            "prob": [7.2, 8.5],
+            "dc": [7.125, 3.33],
+            "prob": [5.7, 9],
         }
         # create a new instance for pptx
         self.prs = self._ppt(remake)
@@ -73,6 +74,10 @@ class PptMaker:
 
     def add_mc_results(self, mc_dir):
         mc = self.figs / mc_dir
+        # probalCrs
+        self.prs = ppt_add_probs(
+            self.prs, mc / "prob", self.margins[1], self.shape["prob"]
+        )
         # misfit
         self.prs = ppt_add_one_fig_per_slide(
             self.prs,
@@ -81,9 +86,12 @@ class PptMaker:
             [15, 12.5],
             "misfit.png",
         )
-        # probalCrs
-        self.prs = ppt_add_probs(
-            self.prs, mc / "prob", self.margins[1], self.shape["prob"]
+        # bad grid
+        self.prs = ppt_add_prob_with_dc(
+            self.prs,
+            mc / "bad",
+            [4.567, 1.234],
+            [self.shape["dc"], self.shape["prob"]],
         )
         # vs depth
         self.prs = ppt_add_single_type(

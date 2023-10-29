@@ -8,7 +8,7 @@ def vplane_makecpt(cmoho: str, clab, cVave):
     # crust
     pygmt.makecpt(
         cmap=cmap,
-        series=[3, 4, 0.01],
+        series=[3, 4, 0.05],
         # truncate=[0.05, 0.85],
         output=cmoho,
         continuous=True,
@@ -18,7 +18,7 @@ def vplane_makecpt(cmoho: str, clab, cVave):
     # lithos
     pygmt.makecpt(
         cmap=cmap,
-        series=[4.2, 4.8, 0.01],
+        series=[4.15, 4.65, 0.05],
         # truncate=[0.05, 0.85],
         output=clab,
         continuous=True,
@@ -29,7 +29,7 @@ def vplane_makecpt(cmoho: str, clab, cVave):
     pygmt.makecpt(
         # cmap="polar",
         cmap=cmap,
-        series=[-5, 5, 0.1],
+        series=[-4, 4, 0.05],
         output=cVave,
         continuous=True,
         background=True,

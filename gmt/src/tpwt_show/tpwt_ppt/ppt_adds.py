@@ -3,6 +3,47 @@ from pathlib import Path
 import json
 
 
+def ppt_add_prob_with_dc(prs, figs, margin, shapes):
+    """
+    This script can insert prob with dispersion curve
+    into a new slide of pptx.
+    Each slide has 2 columns, and each column is made by dc and prob.
+    """
+    irow, icol = 0.382, 1
+    [left_margin, top_margin] = margin
+    [dc_shape, prob_shape] = shapes
+    dc_height = dc_shape[1]*1.2
+    prob_height = prob_shape[1]*1.2*(dc_shape[0]/prob_shape[0])
+
+    dp_figs = [
+        [
+            str(dc),
+            str(dc.parent / dc.name.replace("dispersion_curve", "mc_prob")),
+        ]
+        for dc in figs.glob("dis*")
+    ]
+    blank_slide_layout = prs.slide_layouts[6]
+    slide = prs.slides.add_slide(blank_slide_layout)
+
+    # add pictures
+    for i, dp in enumerate(dp_figs):
+        # set margin for each fig
+        left = util.Cm(left_margin + i * (dc_shape[0] + icol))
+
+        top = util.Cm(top_margin)
+        # add dc fig
+        slide.shapes.add_picture(
+            dp[0], left, top, util.Cm(dc_shape[0]), util.Cm(dc_height)
+        )
+        top += util.Cm(dc_shape[1] + irow)
+        # add prob fig
+        slide.shapes.add_picture(
+            dp[1], left, top, util.Cm(dc_shape[0]), util.Cm(prob_height)
+        )
+
+    return prs
+
+
 def ppt_add_dcs(prs, figs, margin, shape):
     """
     This script can insert r*c pictures of dispersion curve
@@ -10,7 +51,7 @@ def ppt_add_dcs(prs, figs, margin, shape):
     """
     config_param = {
         "rc_n": [5, 3],
-        "rc_i": [0.382, 1],
+        "rc_i": [0.456, 0.234],
         "margin": margin,
         "shape": shape,
         "title": "Dispersion Curves",
@@ -27,8 +68,8 @@ def ppt_add_probs(prs, figs, margin, shape):
     into a new slide of pptx.
     """
     config_param = {
-        "rc_n": [2, 3],
-        "rc_i": [0.8, 0.5],
+        "rc_n": [2, 4],
+        "rc_i": [0.234, 0.123],
         "margin": margin,
         "shape": shape,
         "title": "probalCrs by mcmc",
