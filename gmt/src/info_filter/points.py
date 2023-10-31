@@ -9,13 +9,18 @@ from tpwt_r import Point  # pyright: ignore
 import xarray as xr
 
 
-def hull_points(data: pd.DataFrame) -> None:
-    ff = "src/txt/sta_hull.nc"
-    points = data[["x", "y"]].values
+def area_hull_files(region, txt) -> None:
+    sta_file = txt / "station.lst"
+    sta = pd.read_csv(
+        sta_file, delim_whitespace=True, usecols=[1, 2], names=["x", "y"]
+    )
+    sta["x"] = sta["x"].clip(lower=region[0], upper=region[1])
+    sta["y"] = sta["y"].clip(lower=region[-2], upper=region[-1])
+    points = sta[["x", "y"]].values
     hull = ConvexHull(points)
     hull_points = points[hull.vertices]
     df = pd.DataFrame(hull_points, columns=["x", "y"])
-    # df.to_csv(pf, sep="\t", index=False, header=False)
+    df.to_csv(txt / "area_hull.csv", index=False)
     ds = xr.Dataset(
         {"x_values": ("points", df["x"]), "y_values": ("points", df["y"])},
         coords={
@@ -23,7 +28,7 @@ def hull_points(data: pd.DataFrame) -> None:
             "y_coords": ("points", df["y"]),
         },
     )
-    ds.to_netcdf(ff)
+    ds.to_netcdf(txt / "area_hull.nc")
 
 
 ###############################################################################
@@ -61,11 +66,14 @@ def clock_sorted(points):
     )
 
 
-def points_boundary(grids: pd.DataFrame, clock=False):
+def points_boundary(data: pd.DataFrame, region=None, clock=False):
     """
     Get the boundary of points getted from the file.
     """
-    data = np.array(grids)
+    if region is not None:
+        data["x"].clip(lower=region[0], upper=region[1])
+        data["y"].clip(lower=region[-2], upper=region[-1])
+    data = np.array(data)
     hull = ConvexHull(data)
     points = data[hull.vertices]
     if clock:

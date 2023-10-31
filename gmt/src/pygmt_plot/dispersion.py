@@ -5,9 +5,7 @@ import pandas as pd
 from .gmt import plot_dispersion_curve
 
 
-def gmt_plot_dispersion_curves(mmf: str):
-    from src import info_filter
-
+def gmt_plot_dispersion_curves(mmf):
     """
     plot dispersion curves of tpwt and ant
     """
@@ -31,7 +29,7 @@ def gmt_plot_dispersion_curves(mmf: str):
     #     header=None,
     #     delim_whitespace=True,
     # )
-    # boundary = info_filter.points_boundary(sta)
+    # boundary = info_filter.points_boundary(sta, region)
     # merged_inner = info_filter.points_inner(merged_data, boundary=boundary)
     merged_inner = merged_data[
         (merged_data["x"] == 122.0) & (merged_data["y"] == 32.5)

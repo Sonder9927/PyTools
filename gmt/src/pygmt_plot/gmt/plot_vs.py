@@ -7,11 +7,11 @@ import pygmt
 
 from .gmt_fig import fig_tomos
 from .gmt_make_data import make_topos, tomo_grid_data
-from .plane import vplane_clip_data, vplane_makecpt
+from .panel import vpanel_clip_data, vpanel_makecpt
 
 
 # plot v plane
-def plot_vs_vplane(
+def plot_vs_vpanel(
     vs, *, idt, moho, line, path, hregion, fname, lab=None, dep=-250, ave=False
 ):
     """
@@ -27,12 +27,13 @@ def plot_vs_vplane(
 
     # make cpt files
     cpts = [f"temp/{c}" for c in ["crust.cpt", "lithos.cpt", "Vave.cpt"]]
-    vplane_makecpt(*cpts)
+    vpanel_makecpt(*cpts)
 
     # vs grid
     grid = vs[[idt, "z", "v"]]
+    grid.to_csv("grid.csv", index=False)
     grid.columns = ["x", "y", "z"]
-    vs_grd = "temp/vs.grd"
+    vs_grd = "temp/temp.grd"
     tomo_grid_data(grid, vs_grd, lregion, blockmean=[0.5, 1])
     tomos = [{"grid": vs_grd, "cmap": cpts[-1]}]
     suffix = "_ave"
@@ -40,7 +41,7 @@ def plot_vs_vplane(
     if not ave:
         ic("Clipping moho from vs.grd...")
         # cut tomo_moho from vs_grd
-        data = vplane_clip_data(vs_grd, borders[1], lregion)
+        data = vpanel_clip_data(vs_grd, borders[1], lregion)
         # notice the order of grdimage: 1-lithos, 2-crust
         tomos = [
             {"grid": vs_grd, "cmap": cpts[1]},
@@ -51,10 +52,10 @@ def plot_vs_vplane(
         title = f"Sv({idt})"
 
     fname = f"{fname}_{idt}{suffix}.png"
-    gmt_plot_vs_vplane(topo, tomos, lregion, borders, line, title, fname, ave)
+    gmt_plot_vs_vpanel(topo, tomos, lregion, borders, line, title, fname, ave)
 
 
-def plot_vs_hplane(grid, region, fname, *, ave):
+def plot_vs_hpanel(grid, region, fname, ave):
     """
     gmt plot hplane of vs
     """
@@ -84,16 +85,16 @@ def plot_vs_hplane(grid, region, fname, *, ave):
         )
 
     # make tomo grid data
-    tomo_grd = "temp/tomo.grd"
-    tomo_grid_data(grid, tomo_grd, region)
-    tomo = {"grid": tomo_grd, "cmap": cptfile}
+    # tomo_grd = "temp/tomo.grd"
+    # tomo_grid_data(grid, tomo_grd, region)
+    tomo = {"grid": grid, "cmap": cptfile}
 
     # gmt plot hplane
-    gmt_plot_vs_hplane(topo, tomo, fname)
+    gmt_plot_vs_hpanel(topo, tomo, fname)
 
 
 # gmt plot v plane
-def gmt_plot_vs_vplane(topo, tomos, lregion, borders, line, title, fn, ave):
+def gmt_plot_vs_vpanel(topo, tomos, lregion, borders, line, title, fn, ave):
     ic("figing...")
     # gmt plot
     fig = pygmt.Figure()
@@ -143,8 +144,7 @@ def gmt_plot_vs_vplane(topo, tomos, lregion, borders, line, title, fn, ave):
     fig.savefig(fn)
 
 
-# def gmt_plot_vs_hplane(grd, cpt, region, gra, fname):
-def gmt_plot_vs_hplane(topo, tomo, fname):
+def gmt_plot_vs_hpanel(topo, tomo, fname):
     sta = pd.read_csv(
         "src/txt/station.lst",
         usecols=[1, 2],

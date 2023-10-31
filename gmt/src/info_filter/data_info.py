@@ -7,7 +7,7 @@ import pandas as pd
 import pygmt
 
 from .grid import GridPhv
-from .points import points_boundary, points_inner, hull_points
+from .points import points_boundary, points_inner
 
 # from tpwt_r import Point
 
@@ -68,8 +68,7 @@ def vel_info(target: str, periods=None):
     stas = pd.read_csv(
         sta_file, delim_whitespace=True, usecols=[1, 2], names=["x", "y"]
     )
-    hull_points(stas)
-    boundary = points_boundary(stas[["x", "y"]])  # default is clock
+    boundary = points_boundary(stas[["x", "y"]], region)  # default is clock
     # po = clock_sorted(boundary_points)  # no need
 
     gd = Path("grids")
@@ -107,18 +106,7 @@ def vel_info(target: str, periods=None):
         json.dump(jsd, f)
 
 
-def truncate_misfit(mmf, limit, savefile=None):
-    mmf = pd.read_csv(mmf)
-    misfit = mmf[["x", "y", "misfit"]]
-    result = misfit[misfit["misfit"] > limit]
-    if savefile is not None:
-        result.to_csv(savefile, index=None)
-    return result
-
-
-def calc_lab(vsf: Path, mmf, mlf):
-    vs = pd.read_csv(vsf)
-    mm = pd.read_csv(mmf)
+def calc_lab(vs, mm, mlf):
     data = vs.merge(mm[["x", "y", "moho"]], on=["x", "y"], how="left")
     data["moho"] = -data["moho"]
     df = data[(data["z"] < data["moho"] - 20) & (data["z"] > -240)]

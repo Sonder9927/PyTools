@@ -3,23 +3,57 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from .gmt import plot_area_map, plot_evt_sites, plot_rays, plot_misfit
+from .gmt import (
+    plot_area_map,
+    plot_evt_sites,
+    plot_rays,
+    plot_misfit,
+    plot_model,
+)
 
 
-def gmt_plot_area(region, pesf):
+class AreaPainter:
+    def __init__(self, region, pesf) -> None:
+        self.regions = [[110, 125, 25, 40], region]
+        self.figs = Path("images/area_figs")
+        self.pes = pd.read_csv(pesf)
+
+    def area_map(self):
+        plot_area_map(self.regions, self._fig("area.png"))
+
+    def model(self):
+        plot_model(self.regions[1], self._fig("model.png"))
+
+    def per_evt(self):
+        data = self.pes.groupby("per").size().to_dict()
+        _plot_per_evt(data, self._fig("perNum_vel.png"))
+
+    def sites(self):
+        sites = self.pes[["evt"]].drop_duplicates()
+        plot_evt_sites(sites, self.regions[1], self._fig("evt_sites.png"))
+
+    def rays(self):
+        rays = self.pes[["evt", "sta"]].drop_duplicates()
+        plot_rays(self.regions, rays, self._fig("rays_cover.png"))
+
+    def _fig(self, fn) -> str:
+        return str(self.figs / fn)
+
+
+def gmt_plot_area(region, pesf, onlymap=True):
     vicinity = [110, 125, 25, 40]
     ip = Path("images/area_figs")
-    if not ip.exists():
-        ip.mkdir()
-    plot_area_map([vicinity, region], str(ip / "area.png"))
-    return
-    pes = pd.read_csv(pesf)
 
-    # _plot_per_evt(pes.groupby("per").size().to_dict(), ip / "perNum_vel.png")
+    # plot area map with topo
+    plot_area_map([vicinity, region], str(ip / "area.png"))
+    if onlymap:
+        return
+    pes = pd.read_csv(pesf)
+    _plot_per_evt(pes.groupby("per").size().to_dict(), ip / "perNum_vel.png")
     rays = pes[["evt", "sta"]].drop_duplicates()
     sites = rays[["evt"]].drop_duplicates()
-    # plot_evt_sites(sites, region, str(ip / "evt_sites.png"))
-    # plot_rays([vicinity, region], rays, str(ip / "rays_cover.png"))
+    plot_evt_sites(sites, region, str(ip / "evt_sites.png"))
+    plot_rays([vicinity, region], rays, str(ip / "rays_cover.png"))
 
 
 def gmt_plot_misfit(mm_file, region):

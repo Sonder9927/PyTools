@@ -115,7 +115,7 @@ def gmt_plot_diff(diff: pd.DataFrame, grds, region, cpt, fname):
     fig.savefig(fname)
 
 
-def plot_diff(grid_tpwt, grid_ant, region, fig_name):
+def plot_diff(grid_ant, grid_tpwt, region, fig_name):
     # cpt file
     cpt = "temp/tomo.cpt"
     # grd file

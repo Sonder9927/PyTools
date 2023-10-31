@@ -1,3 +1,11 @@
+"""
+1. get hull points and statistic info of grid files
+2. plot [diff, vel, as, cb]
+3. plot dispersion curves from vel_info
+4. plot s-wave figs (need to collect data
+   from all grids by `collect_grids`)
+5. make ppt to show results
+"""
 from pathlib import Path
 
 import pandas as pd
@@ -167,6 +175,16 @@ def sta_clip(region, *, grid=None, data=None, output=None):
     clip_data = pygmt.select(data, F=hull)
     if output in ["grd", "grid"]:
         return pygmt.xyz2grd(data=clip_data, region=region, spacing=0.01)
+    return clip_data
+
+
+def area_clip(region, data, spacing=0.01, grd=False):
+    hull = Path("src/txt/area_hull.nc")
+    if type(data) is str:
+        data = pygmt.grd2xyz(data)
+    clip_data = pygmt.select(data, F=hull)
+    if grd:
+        return pygmt.xyz2grd(data=clip_data, region=region, spacing=spacing)
     return clip_data
 
 

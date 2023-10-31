@@ -2,7 +2,7 @@ import pandas as pd
 import pygmt
 
 
-def vplane_makecpt(cmoho: str, clab, cVave):
+def vpanel_makecpt(cmoho: str, clab, cVave):
     cmap = "polar"
     cmap = "src/txt/cptfiles/Vc_1.8s.cpt"
     # crust
@@ -18,7 +18,8 @@ def vplane_makecpt(cmoho: str, clab, cVave):
     # lithos
     pygmt.makecpt(
         cmap=cmap,
-        series=[4.15, 4.65, 0.05],
+        series=[4.41 - 0.25, 4.41 + 0.2, 0.02],
+        # series=[4.15, 4.65, 0.03],
         # truncate=[0.05, 0.85],
         output=clab,
         continuous=True,
@@ -37,7 +38,7 @@ def vplane_makecpt(cmoho: str, clab, cVave):
     )
 
 
-def vplane_clip_data(grid, border, region):
+def vpanel_clip_data(grid, border, region):
     from src.info_filter import points_inner
 
     # read grid data and cut into parts

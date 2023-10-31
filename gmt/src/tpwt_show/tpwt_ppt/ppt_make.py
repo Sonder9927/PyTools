@@ -6,6 +6,7 @@ from .ppt_adds import (
     ppt_add_dcs,
     ppt_add_probs,
     ppt_add_prob_with_dc,
+    ppt_add_profile,
     ppt_add_one_fig_per_slide,
     ppt_add_single_type,
 )
@@ -28,21 +29,31 @@ class PptMaker:
 
     def add_area(self, area_dir):
         area = self.figs / area_dir
-        self.prs = ppt_add_one_fig_per_slide(
-            self.prs, area, [3.13, 2.45], [20, 11], "area.png"
-        )
-        self.prs = ppt_add_one_fig_per_slide(
-            self.prs, area, [4.56, 2.1], [14.5, 15.5], "evt_sites.png"
-        )
-        self.prs = ppt_add_one_fig_per_slide(
-            self.prs, area, [3.456, 2.345], [18, 10], "perNum_vel.png"
-        )
-        self.prs = ppt_add_one_fig_per_slide(
-            self.prs, area, [3.6, 2.1], [15, 15], "rays_cover.png"
-        )
+        self.prs = ppt_add_one_fig_per_slide(self.prs, area, [3.13, 2.45],
+                                             [20, 11], "area.png")
+        self.prs = ppt_add_one_fig_per_slide(self.prs, area, [4.56, 2.1],
+                                             [14.5, 15.5], "evt_sites.png")
+        self.prs = ppt_add_one_fig_per_slide(self.prs, area, [3.456, 2.345],
+                                             [18, 10], "perNum_vel.png")
+        # self.prs = ppt_add_one_fig_per_slide(
+        #     self.prs, area, [3.6, 2.1], [15, 15], "rays_cover.png"
+        # )
+        self.prs = ppt_add_one_fig_per_slide(self.prs, area, [2.333, 2.45],
+                                             [23, 14], "model.png")
 
-    def add_tpwt_results(self, tpwt_dir):
-        tpwt = self.figs / tpwt_dir
+    def add_phase_results(self, phase_dir):
+        phase = self.figs / phase_dir
+        # ant
+        self.prs = ppt_add_single_type(
+            self.prs,
+            phase / "ant_figs",
+            "*VEL*",
+            self.margins[1],
+            self.shape["sub1"],
+            key=lambda p: int(p.stem.split("_")[-1]),
+        )
+        # tpwt
+        tpwt = phase / "tpwt_figs"
         # add phase vel of all periods
         self.prs = ppt_add_single_type(
             self.prs,
@@ -70,6 +81,14 @@ class PptMaker:
             self.margins[1],
             self.shape["sub1"],
             key=lambda p: int(p.stem.split("_")[-1]),
+        )
+        # add diff between ant and tpwt
+        self.prs = ppt_add_one_fig_per_slide(
+            self.prs,
+            phase / "diff_figs",
+            self.margins[0],
+            self.shape["center"],
+            "diff*",
         )
 
     def add_mc_results(self, mc_dir):
@@ -104,39 +123,15 @@ class PptMaker:
         )
         # vs profile
         for lt in (mc / "profile").glob("*"):
-            slide = self.prs.slides.add_slide(self.prs.slide_layouts[0])
-            title = slide.shapes.title
-            title.text = lt.name
-            self.prs = ppt_add_one_fig_per_slide(
-                self.prs,
-                lt,
-                self.margins[0],
-                self.shape["center"],
-                "vs*",
-            )
+            self.prs = ppt_add_profile(self.prs, lt, [0.35, 1.83],
+                                       self.shape["center"])
 
     def add_dispersion_curves(self, dcs_dir):
         """
         add diff of all periods
         """
-        self.prs = ppt_add_dcs(
-            self.prs, self.figs / dcs_dir, self.margins[1], self.shape["dc"]
-        )
-
-    def add_diffs(self, diff_dir):
-        """
-        add diff of all periods
-        """
-        # self.prs = ppt_add_diffs(
-        #     self.prs, self.figs / diff_dir, info_file, self.margin
-        # )
-        self.prs = ppt_add_one_fig_per_slide(
-            self.prs,
-            self.figs / diff_dir,
-            self.margins[0],
-            self.shape["center"],
-            "diff*",
-        )
+        self.prs = ppt_add_dcs(self.prs, self.figs / dcs_dir, self.margins[1],
+                               self.shape["dc"])
 
     def save(self, target=None):
         """

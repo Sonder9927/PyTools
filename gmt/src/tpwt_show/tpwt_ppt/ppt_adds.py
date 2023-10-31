@@ -3,6 +3,41 @@ from pathlib import Path
 import json
 
 
+def ppt_add_profile(prs, figs, margin, shape):
+    """
+    This script can insert probfile with ave.
+    Each slide has 2 columns.
+    """
+    [left_margin, top_margin] = margin
+    [width, height] = shape
+    width = util.Cm(width * 0.81)
+    height = util.Cm(height * 0.83)
+
+    pfa_figs = [[str(pf),
+                 str(pf.parent / pf.name.replace("vel", "ave"))]
+                for pf in figs.glob("*_vel.png")]
+    slide = prs.slides.add_slide(prs.slide_layouts[0])
+    title = slide.shapes.title
+    title.text = figs.name
+
+    # add pictures
+    blank_slide_layout = prs.slide_layouts[6]
+    top = util.Cm(top_margin)
+    for pfa in pfa_figs:
+        slide = prs.slides.add_slide(blank_slide_layout)
+        # set margin for each fig
+        left = util.Cm(left_margin)
+
+        # add abs vel fig
+        slide.shapes.add_picture(pfa[0], left, top, width,
+                                 height + util.Cm(0.9))
+        left += util.Cm(0.3) + width
+        # add ave vel fig
+        slide.shapes.add_picture(pfa[1], left, top, width, height)
+
+    return prs
+
+
 def ppt_add_prob_with_dc(prs, figs, margin, shapes):
     """
     This script can insert prob with dispersion curve
@@ -12,16 +47,13 @@ def ppt_add_prob_with_dc(prs, figs, margin, shapes):
     irow, icol = 0.382, 1
     [left_margin, top_margin] = margin
     [dc_shape, prob_shape] = shapes
-    dc_height = dc_shape[1]*1.2
-    prob_height = prob_shape[1]*1.2*(dc_shape[0]/prob_shape[0])
+    dc_height = dc_shape[1] * 1.2
+    prob_height = prob_shape[1] * 1.2 * (dc_shape[0] / prob_shape[0])
 
-    dp_figs = [
-        [
-            str(dc),
-            str(dc.parent / dc.name.replace("dispersion_curve", "mc_prob")),
-        ]
-        for dc in figs.glob("dis*")
-    ]
+    dp_figs = [[
+        str(dc),
+        str(dc.parent / dc.name.replace("dispersion_curve", "mc_prob")),
+    ] for dc in figs.glob("dis*")]
     blank_slide_layout = prs.slide_layouts[6]
     slide = prs.slides.add_slide(blank_slide_layout)
 
@@ -32,14 +64,12 @@ def ppt_add_prob_with_dc(prs, figs, margin, shapes):
 
         top = util.Cm(top_margin)
         # add dc fig
-        slide.shapes.add_picture(
-            dp[0], left, top, util.Cm(dc_shape[0]), util.Cm(dc_height)
-        )
+        slide.shapes.add_picture(dp[0], left, top, util.Cm(dc_shape[0]),
+                                 util.Cm(dc_height))
         top += util.Cm(dc_shape[1] + irow)
         # add prob fig
-        slide.shapes.add_picture(
-            dp[1], left, top, util.Cm(dc_shape[0]), util.Cm(prob_height)
-        )
+        slide.shapes.add_picture(dp[1], left, top, util.Cm(dc_shape[0]),
+                                 util.Cm(prob_height))
 
     return prs
 
@@ -169,7 +199,7 @@ def slide_add_batch_with_title(prs, figs, config):
     title.text = config["title"]
 
     batch = nrow * ncol
-    figs_batch = [figs[i : i + batch] for i in range(0, len(figs), batch)]
+    figs_batch = [figs[i:i + batch] for i in range(0, len(figs), batch)]
     blank_slide_layout = prs.slide_layouts[6]
     for fb in figs_batch:
         # new slide
@@ -181,8 +211,7 @@ def slide_add_batch_with_title(prs, figs, config):
             left = util.Cm(left_margin + i % ncol * (width + icol))
             top = util.Cm(top_margin + i // ncol * (height + irow))
 
-            slide.shapes.add_picture(
-                str(f), left, top, util.Cm(width), util.Cm(height)
-            )
+            slide.shapes.add_picture(str(f), left, top, util.Cm(width),
+                                     util.Cm(height))
 
     return prs

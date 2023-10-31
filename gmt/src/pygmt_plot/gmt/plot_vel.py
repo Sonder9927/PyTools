@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 import pygmt
 
-from .gmt_make_data import make_topos, tomo_grid_data
+from .gmt_make_data import make_topos, tomo_grid_data, area_clip
 from .gmt_fig import fig_tomos
 
 
@@ -78,7 +78,8 @@ def plot_as(velf, stdf, region, fn) -> None:
     grd = pd.read_csv(
         velf, delim_whitespace=True, names=["x", "y", "z"], header=None
     )
-    mm = grd.z.mean()
+    grd_clip = area_clip(region, grd)
+    mm = grd_clip["z"].mean()
     grd["z"] = (grd["z"] - mm) / mm * 100
     vel_grd = "temp/temp_vel.grd"
     tomo_grid_data(grd, vel_grd, region)
@@ -97,6 +98,8 @@ def plot_as(velf, stdf, region, fn) -> None:
 
 def gmt_plot_as(region, vel, std, fn, sta=None):
     per = Path(fn).stem.split("_")[-1]
+    if int(per) < 120:
+        return
     topo = make_topos("ETOPO1", region)
     cpt = "temp/temp.cpt"
     fig = pygmt.Figure()
@@ -113,7 +116,7 @@ def gmt_plot_as(region, vel, std, fn, sta=None):
         with fig.set_panel(panel=0):
             pygmt.makecpt(
                 cmap="src/txt/cptfiles/Vc_1.8s.cpt",
-                series=[-4.1, 4.1],
+                series=[-2, 2],
                 output=cpt,
             )
             tomos = [{"grid": vel, "cmap": cpt}]
@@ -128,10 +131,12 @@ def gmt_plot_as(region, vel, std, fn, sta=None):
                 offset="j0.1",
             )
             fig.colorbar(
-                frame=["a2f2", 'x+l"TPWT Phase velocity anomaly"', "y+l%"]
+                frame=["a1f1", 'x+l"TPWT Phase velocity anomaly"', "y+l%"]
             )
         with fig.set_panel(panel=1):
-            pygmt.makecpt(cmap="hot", series=[0, 81], reverse=True, output=cpt)
+            pygmt.makecpt(
+                cmap="hot", series=[0, 121], reverse=True, output=cpt
+            )
             tomos = [{"grid": std, "cmap": cpt}]
             fig = fig_tomos(fig, topo, tomos, **kws)
             fig.colorbar(
