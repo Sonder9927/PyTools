@@ -2,13 +2,12 @@ from src.plot_results import Painter
 
 
 def main():
-    pr = Painter(init=True)
+    pr = Painter()
     # pr.area("model")
-    pr.phase("tpwt", "vel")
+    # pr.phase("cb", "tpwt", dcheck=1.5)
     # pr.dispersion()
-    # depths = [40, 50, 60, 70, 80, 90, 100, 120, 150, 180, 210, 240]
-    # pr.mcmc(depths=depths)
-    # pr.mcmc(linetypes=["arise", "decline", "xline", "yline"])
+    # depths = list(range(10, 210, 10))
+    pr.mcmc(profile=True)  # , depths=depths)  # , profile=True)
 
 
 if __name__ == "__main__":

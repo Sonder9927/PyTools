@@ -44,7 +44,7 @@ class Painter:
             else:
                 raise NotImplementedError
 
-    def phase(self, method="tpwt", idt="vel", *, periods=None, dcheck=2.0):
+    def phase(self, idt="vel", method="tpwt", *, periods=None, dcheck=2.0):
         self._mkdir("ant_figs", "tpwt_figs")
         if idt == "vel":
             self.php.vel(method, idt, periods=periods)

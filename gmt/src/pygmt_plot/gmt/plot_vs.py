@@ -12,7 +12,7 @@ from .panel import vpanel_clip_data, vpanel_makecpt
 
 # plot v plane
 def plot_vs_vpanel(
-    vs, *, idt, moho, line, path, hregion, fname, lab=None, dep=-250, ave=False
+    vs, *, idt, moho, line, path, hregion, fname, lab=None, dep=-200, ave=False
 ):
     """
     gmt plot vplane of vs contain abso and ave.
@@ -31,7 +31,6 @@ def plot_vs_vpanel(
 
     # vs grid
     grid = vs[[idt, "z", "v"]]
-    grid.to_csv("grid.csv", index=False)
     grid.columns = ["x", "y", "z"]
     vs_grd = "temp/temp.grd"
     tomo_grid_data(grid, vs_grd, lregion, blockmean=[0.5, 1])
@@ -165,7 +164,7 @@ def gmt_plot_vs_hpanel(topo, tomo, fname):
     )
 
     text = Path(fname).stem.split("_")[-1]
-    fig = fig_tomos(fig, topo, [tomo], tect=0, sta=sta, clip=True)
+    fig = fig_tomos(fig, topo, [tomo], tect=0, sta=None, clip=True)
     fig.text(
         x=topo["region"][0],
         y=topo["region"][-1],

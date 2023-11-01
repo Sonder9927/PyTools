@@ -8,7 +8,7 @@ import pandas as pd
 import pygmt
 
 from .gmt_fig import fig_tomos
-from .gmt_make_data import diff_make, make_topos, sta_clip
+from .gmt_make_data import diff_make, make_topos, area_clip
 
 
 def gmt_plot_diff(diff: pd.DataFrame, grds, region, cpt, fname):
@@ -21,7 +21,7 @@ def gmt_plot_diff(diff: pd.DataFrame, grds, region, cpt, fname):
     )
 
     topo = make_topos("ETOPO1", region)
-    diff = sta_clip(region, data=diff)["z"]
+    diff = area_clip(diff)["z"]
     # gmt plot
     fig = pygmt.Figure()
     # define figure configuration

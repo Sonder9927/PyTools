@@ -38,8 +38,8 @@ class PptMaker:
         # self.prs = ppt_add_one_fig_per_slide(
         #     self.prs, area, [3.6, 2.1], [15, 15], "rays_cover.png"
         # )
-        self.prs = ppt_add_one_fig_per_slide(self.prs, area, [2.333, 2.45],
-                                             [23, 14], "model.png")
+        self.prs = ppt_add_one_fig_per_slide(self.prs, area, [1.5, 2.45],
+                                             [21, 12], "model.png")
 
     def add_phase_results(self, phase_dir):
         phase = self.figs / phase_dir

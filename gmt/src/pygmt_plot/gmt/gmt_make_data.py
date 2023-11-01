@@ -178,12 +178,14 @@ def sta_clip(region, *, grid=None, data=None, output=None):
     return clip_data
 
 
-def area_clip(region, data, spacing=0.01, grd=False):
+def area_clip(data, *, region=None, spacing=0.01):
     hull = Path("src/txt/area_hull.nc")
     if type(data) is str:
         data = pygmt.grd2xyz(data)
     clip_data = pygmt.select(data, F=hull)
-    if grd:
+    if clip_data is None:
+        raise ValueError("Nothing were selected.")
+    if region is not None:
         return pygmt.xyz2grd(data=clip_data, region=region, spacing=spacing)
     return clip_data
 

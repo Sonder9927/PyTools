@@ -1,4 +1,5 @@
 import json
+from icecream import ic
 
 
 from .gmt import plot_as, plot_diff, plot_vel
@@ -11,7 +12,7 @@ class PhasePainter:
         self.region = region
         with open(ps_file) as f:
             per_se_pairs = json.load(f)
-        self.periods = per_se_pairs.keys
+        self.periods = [int(i) for i in per_se_pairs.keys()]
         self.gps: list[GridPhv] = [
             GridPhv(p, s) for p, s in per_se_pairs.items()
         ]
@@ -20,11 +21,13 @@ class PhasePainter:
         for gp in self._gps(periods):
             if idt == "vel":
                 vel = gp.grid_file(method, idt)
-                cptconfig = {"series": gp.series}
-                plot_vel(vel, self.region, gp.fig_name(method, idt), cptconfig)
+                if vel.exists():
+                    cpt = {"series": gp.series}
+                    plot_vel(vel, self.region, gp.fig_name(method, idt), cpt)
             elif idt == "cb":
                 vel = gp.grid_file(method, idt, dcheck=dcheck)
-                plot_vel(vel, self.region, gp.fig_name(method, idt))
+                if vel.exists():
+                    plot_vel(vel, self.region, gp.fig_name(method, idt))
             else:
                 raise ValueError("choose `vel` or `cb` for idt")
 
@@ -32,13 +35,15 @@ class PhasePainter:
         for gp in self._gps(periods):
             vel = gp.grid_file("tpwt", "vel")
             std = gp.grid_file("tpwt", "std")
-            plot_as(vel, std, self.region, gp.fig_name("tpwt", "AS"))
+            if all([vel.exists(), std.exists()]):
+                plot_as(vel, std, self.region, gp.fig_name("tpwt", "as"))
 
     def diff(self, periods=None):
         for gp in self._gps(periods):
             ant = gp.grid_file("ant", "vel")
             tpwt = gp.grid_file("tpwt", "vel")
-            plot_diff(tpwt, ant, self.region, gp.diff_name())
+            if all([ant.exists(), tpwt.exists()]):
+                plot_diff(tpwt, ant, self.region, gp.diff_name())
 
     def _gps(self, periods):
         pers = periods or self.periods

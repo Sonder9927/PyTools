@@ -21,7 +21,7 @@ def fig_tomos(fig, topo, tomos, frame=None, **kwargs):
     # plot tomos
     if kwargs.get("clip"):
         for tomo in tomos:
-            tomo["grid"] = area_clip(topo["region"], tomo["grid"], grd=True)
+            tomo["grid"] = area_clip(tomo["grid"], region=topo["region"])
             fig.grdimage(**tomo, **tomo_param)
     else:
         for tomo in tomos:
@@ -45,9 +45,9 @@ def fig_tect_and_sta(fig, tect, sta, pen):
     geo_data = ["China_tectonic.dat", "CN-faults.gmt", "find.gmt"]
     fig.coast(shorelines="1/0.5p,black")
     if pen is None:
-        pen = "1p,black,-"
-    fig.plot(data=f"src/txt/tects/{geo_data[tect]}", pen=pen)
-    fig.plot(data="src/txt/tects/small_faults.gmt", pen=pen)
+        pen = ["1p,black,-", "0.5p,black,-"]
+    fig.plot(data=f"src/txt/tects/{geo_data[tect]}", pen=pen[0])
+    fig.plot(data="src/txt/tects/small_faults.gmt", pen=pen[-1])
     # fig.plot(data="src/txt/tects/small_faults_finding.gmt", pen="red,-")
     if sta is not None:
         fig.plot(data=sta, style="t0.1c", fill="darkblue")
