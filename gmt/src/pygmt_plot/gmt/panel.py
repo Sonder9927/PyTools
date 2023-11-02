@@ -18,8 +18,8 @@ def vpanel_makecpt(cmoho: str, clab, cVave):
     # lithos
     pygmt.makecpt(
         cmap=cmap,
-        series=[4.41 - 0.21, 4.41 + 0.14, 0.01],
-        # series=[4.15, 4.65, 0.03],
+        series=[4.32 - 0.15, 4.32 + 0.2, 0.01],
+        # series=[4.41 - 0.21, 4.41 + 0.14, 0.01],
         # truncate=[0.05, 0.85],
         output=clab,
         continuous=True,

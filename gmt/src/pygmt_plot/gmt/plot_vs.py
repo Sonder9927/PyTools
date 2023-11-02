@@ -6,7 +6,7 @@ import pandas as pd
 import pygmt
 
 from .gmt_fig import fig_tomos
-from .gmt_make_data import make_topos, tomo_grid_data
+from .gmt_make_data import make_topos, tomo_grid, series
 from .panel import vpanel_clip_data, vpanel_makecpt
 
 
@@ -33,7 +33,7 @@ def plot_vs_vpanel(
     grid = vs[[idt, "z", "v"]]
     grid.columns = ["x", "y", "z"]
     vs_grd = "temp/temp.grd"
-    tomo_grid_data(grid, vs_grd, lregion, blockmean=[0.5, 1])
+    tomo_grid(grid, lregion, vs_grd, blockmean=[0.5, 1])
     tomos = [{"grid": vs_grd, "cmap": cpts[-1]}]
     suffix = "_ave"
     title = f"ave Sv({idt})"
@@ -54,7 +54,7 @@ def plot_vs_vpanel(
     gmt_plot_vs_vpanel(topo, tomos, lregion, borders, line, title, fname, ave)
 
 
-def plot_vs_hpanel(grid, region, fname, ave):
+def plot_vs_hpanel(grd, region, fname, ave):
     """
     gmt plot hplane of vs
     """
@@ -74,19 +74,17 @@ def plot_vs_hpanel(grid, region, fname, ave):
             # reverse=True,
         )
     else:
-        series = [2.5, 5.5, 0.1]
+        # series = [2.5, 5.5, 0.1]
+        grid = pygmt.grd2xyz(grd)
         pygmt.makecpt(
             cmap=cmap,
-            series=series,
+            series=series(grid, method=1),
             output=cptfile,
             continuous=True,
             background=True,
         )
 
-    # make tomo grid data
-    # tomo_grd = "temp/tomo.grd"
-    # tomo_grid_data(grid, tomo_grd, region)
-    tomo = {"grid": grid, "cmap": cptfile}
+    tomo = {"grid": grd, "cmap": cptfile}
 
     # gmt plot hplane
     gmt_plot_vs_hpanel(topo, tomo, fname)
@@ -112,7 +110,7 @@ def gmt_plot_vs_vpanel(topo, tomos, lregion, borders, line, title, fn, ave):
     ltopo["region"] = lregion
     kwgs = {
         "projection": "X6i/2i",
-        "lines": [borders[1]],
+        "lines": borders[1:],
         "line_pen": "1p,black,-",
     }
     fig = fig_tomos(fig, ltopo, tomos, **kwgs)
@@ -144,13 +142,13 @@ def gmt_plot_vs_vpanel(topo, tomos, lregion, borders, line, title, fn, ave):
 
 
 def gmt_plot_vs_hpanel(topo, tomo, fname):
-    sta = pd.read_csv(
-        "src/txt/station.lst",
-        usecols=[1, 2],
-        names=["x", "y"],
-        header=None,
-        delim_whitespace=True,
-    )
+    # sta = pd.read_csv(
+    #     "src/txt/station.lst",
+    #     usecols=[1, 2],
+    #     names=["x", "y"],
+    #     header=None,
+    #     delim_whitespace=True,
+    # )
     # define figure configuration
     fig = pygmt.Figure()
     pygmt.config(
@@ -163,7 +161,7 @@ def gmt_plot_vs_hpanel(topo, tomo, fname):
         # FONT="10",
     )
 
-    text = Path(fname).stem.split("_")[-1]
+    text = Path(fname).stem.split("_")[-2]
     fig = fig_tomos(fig, topo, [tomo], tect=0, sta=None, clip=True)
     fig.text(
         x=topo["region"][0],

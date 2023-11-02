@@ -106,10 +106,10 @@ def vel_info(target: str, periods=None):
         json.dump(jsd, f)
 
 
-def calc_lab(vs, mm, mlf):
+def calc_lab(vs, mm, mlf, limits: list):
     data = vs.merge(mm[["x", "y", "moho"]], on=["x", "y"], how="left")
     data["moho"] = -data["moho"]
-    df = data[(data["z"] < data["moho"] - 20) & (data["z"] > -240)]
+    df = data[(data["z"] < limits[0]) & (data["z"] > limits[1])]
     dt = df.groupby(["x", "y"], group_keys=False).apply(_gradient)
     result = (
         dt.groupby(["x", "y"])
@@ -118,6 +118,8 @@ def calc_lab(vs, mm, mlf):
         .reset_index(drop=True)
     )
     result.rename(columns={"z": "lab"}, inplace=True)
+    lab_range = [result["lab"].min(), result["lab"].max()]
+    ic(lab_range)
     result.to_csv(mlf, index=None)
 
 
@@ -127,7 +129,7 @@ def _gradient(group):
 
 
 def _target_gra(group):
-    max_idx = group["gra"].idxmin() if any(group["gra"] < 0) else None
+    max_idx = group["gra"].idxmax() if any(group["gra"] < 0) else None
     return (
         group.loc[max_idx, ["x", "y", "moho", "z"]]
         if max_idx is not None

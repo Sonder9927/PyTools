@@ -7,7 +7,6 @@ from .info_filter import GridVs, area_hull_files, calc_lab
 from .pygmt_plot import (
     AreaPainter,
     PhasePainter,
-    gmt_plot_all_periods,
     gmt_plot_dispersion_curves,
     gmt_plot_misfit,
     gmt_plot_vs,
@@ -28,8 +27,6 @@ class Painter:
         if init:
             self._init()
 
-    # def area(self):
-    #     self._mkdir("area_figs")
     def area(self, *args):
         self._mkdir("area_figs")
         for tt in args:
@@ -57,12 +54,6 @@ class Painter:
         else:
             raise NotImplementedError
 
-    # def phv(self, *targets, dcheck=2.0):
-    #     self._mkdir("ant_figs")
-    #     self._mkdir("tpwt_figs")
-    # ts = {t: True for t in targets}
-    # gmt_plot_all_periods(self.region, psjf, dcheck, **ts)
-
     def dispersion(self):
         self._mkdir("dispersion_curves")
         gmt_plot_dispersion_curves(self.mmf)
@@ -76,21 +67,24 @@ class Painter:
         # plot vs panels
         gmt_plot_vs(gv, kwargs)
 
-    def _init(self, misfit_limit=0.5):
+    def initialize(self, *, misfit_limit=0.5, lab_range=None):
         # notice: `self.*f` will be made by this class
         # filter grid where misfit > limit
         mm = pd.read_csv(self.mmf)
         misfit = mm[["x", "y", "misfit"]]
         misfit_limit = misfit[misfit["misfit"] > misfit_limit]
         ic(misfit_limit)
-        moho_range = mm["moho"].min(), mm["moho"].max()
+        moho_range = [mm["moho"].min(), mm["moho"].max()]
         ic(moho_range)
         # make misfit lab file
         vs = pd.read_csv(self.vsf)
-        vs_mantle = vs[vs["z"] < -moho_range[1]]
-        vs_ave = vs_mantle["v"].mean()
+        # vs_range = vs[vs["z"] < -moho_range[1]]
+        vs_range = vs[vs["z"] < moho_range[0]]
+        vs_range = vs_range[vs_range["z"] > -200]
+        vs_ave = vs_range["v"].mean()
         ic(vs_ave)
-        calc_lab(vs, mm, self.mlf)
+        lab_range = lab_range or [-moho_range[1] - 10, -200]
+        calc_lab(vs, mm, self.mlf, lab_range)
         # make hull of stas in the area
         area_hull_files(self.region, txt=self.txt)
 

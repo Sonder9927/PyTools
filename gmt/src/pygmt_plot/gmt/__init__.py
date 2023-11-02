@@ -1,9 +1,4 @@
-from .gmt_make_data import (
-    area_clip,
-    gmt_blockmean_surface_grdsample,
-    make_topos,
-    tomo_grid_data,
-)
+from .gmt_make_data import area_clip, make_topos, tomo_grid
 from .plot_area import (
     lines_generator,
     plot_area_map,
@@ -22,8 +17,7 @@ __all__ = [
     "plot_diff",
     "plot_vel",
     "plot_as",
-    "gmt_blockmean_surface_grdsample",
-    "tomo_grid_data",
+    "tomo_grid",
     "area_clip",
     "make_topos",
     "plot_dispersion_curve",
